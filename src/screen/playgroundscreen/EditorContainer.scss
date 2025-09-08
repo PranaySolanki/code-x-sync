@@ -11,11 +11,11 @@
         button , select {
             padding: 10px 10px;
             border-radius: 7px;
+            cursor: pointer;
         }
         button{
             border: none;
             background-color:rgb(31, 167, 212) ;
-            cursor: pointer;
             transition-duration: 0.4s;
         }
         button:hover{

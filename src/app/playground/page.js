@@ -1,7 +1,10 @@
-import "./index.scss"
+'use client';
+import "@/screen/playgroundscreen/index.scss"
+
 import React, { useState } from 'react';
-import { EditorContainer } from "./EditorContainer.js";
-export const PlaygroundScreen = () => {
+import  EditorContainer  from "@/screen/playgroundscreen/EditorContainer.js";
+import Image from 'next/image';
+const PlaygroundScreen = () => {
 
     const [output, setOutput] = useState('');
     const [input, setInput] = useState('');
@@ -29,7 +32,7 @@ export const PlaygroundScreen = () => {
         <div className="playground-container">
             <div className="header">
 
-                <img src="logo.png" className="logo" alt="logo"/>
+                <Image src="/logo.png" className="logo" alt="logo" width={90} height={90}/>
                 <span className="beside-logo"> CodeXsync</span>
 
             </div>
@@ -68,3 +71,4 @@ export const PlaygroundScreen = () => {
         </div>
     );
 };
+export default PlaygroundScreen;

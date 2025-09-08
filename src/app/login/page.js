@@ -1,7 +1,8 @@
-import "./index.scss";
+'use client';
+import "@/screen/loginscreen/index.scss";
 import { useState } from "react";
 
-export const LoginScreen = () => {
+const LoginScreen = () => {                                   // from export const to const and at end export default
   const [showRegister, setShowRegister] = useState(false);
 
   return (
@@ -102,3 +103,4 @@ export const LoginScreen = () => {
     </section>
   );
 };
+export default LoginScreen;

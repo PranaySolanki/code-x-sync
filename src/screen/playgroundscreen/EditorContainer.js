@@ -1,8 +1,10 @@
+'use client';
 import { useRef, useState } from "react";
 import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
-import { executeCode } from "./CompilerAPI";
-export const EditorContainer = ({ onCodeRun, input }) => {
+import  executeCode  from "./CompilerAPI";
+
+const EditorContainer = ({ onCodeRun, input }) => {
 
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState("c");
@@ -168,4 +170,5 @@ export const EditorContainer = ({ onCodeRun, input }) => {
             </div>
         </div>
     );
-}
+};
+export default EditorContainer;

@@ -1,6 +1,7 @@
 import "./index.scss"
+import Image from "next/image";
 
-export const RightComponent = () => {
+const RightComponent = () => {
     return <div className="right-container">
         <div className="header">
             <div className="title"><span>MY</span> Projects</div>
@@ -25,7 +26,7 @@ export const RightComponent = () => {
         <div className="cards-container"> 
                 <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -38,7 +39,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -51,7 +52,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -64,7 +65,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -96,7 +97,7 @@ export const RightComponent = () => {
             <div className="cards-container"> 
                 <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -109,7 +110,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -122,7 +123,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -135,7 +136,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -167,7 +168,7 @@ export const RightComponent = () => {
         <div className="cards-container"> 
                 <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -180,7 +181,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -193,7 +194,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -206,7 +207,7 @@ export const RightComponent = () => {
                 </div>
                   <div className="card">
                     
-                        <img src="logo.png" alt="logo" />
+                        <Image src="/logo.png" alt="logo" width={50} height={50}/>
                         <div>
                             <span> {"Heap Implemention"}</span>
                             <span>  Language:{"Java"}</span>
@@ -221,4 +222,5 @@ export const RightComponent = () => {
         </div>
         
     </div>
-}
+};
+export default RightComponent;

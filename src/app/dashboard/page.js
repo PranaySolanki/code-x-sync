@@ -1,12 +1,13 @@
-import "./index.scss";
-import { RightComponent } from "./Rightcomponent";
+import "@/screen/homescreen/index.scss";
+import  RightComponent  from "@/screen/homescreen/Rightcomponent/index.js";
+import Image from 'next/image';
 
-export const HomeScreen = () => {
+const HomeScreen = () => {
     return(
          < div className="home-container"> 
             <div className="left-container">
                 <div className="item-container">
-                    <img src="logo.png" alt="logo"/>
+                    <Image src="/logo.png" alt="logo" width={200} height={200}/>
                     <h1> CodeXsync</h1>
                     <h2>code.compile.debug</h2>
                     <button>
@@ -18,10 +19,6 @@ export const HomeScreen = () => {
             <RightComponent />
          </div>
 
-    );
-         
-      
-       
-
- 
+    ); 
 }
+export default HomeScreen;

@@ -11,7 +11,7 @@ const LANGUAGE_VERSIONS = {
     javascript: "18.15.0",
 };
 
-export const executeCode = async (language, sourceCode, stdin) => {
+const executeCode = async (language, sourceCode, stdin) => {
   const response = await API.post("/execute", {
     language: language,
     version: LANGUAGE_VERSIONS[language],
@@ -24,3 +24,4 @@ export const executeCode = async (language, sourceCode, stdin) => {
   });
   return response.data;
 };
+export default executeCode;
