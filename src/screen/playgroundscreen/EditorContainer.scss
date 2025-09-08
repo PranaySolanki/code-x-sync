@@ -1,0 +1,69 @@
+.root-editor-container{
+    background-color: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .editor-header {
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        button , select {
+            padding: 10px 10px;
+            border-radius: 7px;
+        }
+        button{
+            border: none;
+            background-color:rgb(31, 167, 212) ;
+            cursor: pointer;
+            transition-duration: 0.4s;
+        }
+        button:hover{
+            background-color: rgb(0, 112, 150);
+        }
+        .title{
+            font-size: 24px;
+        }
+        select:focus{
+            outline: none;
+        }
+    }
+    .editor-footer{
+        background-color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+
+        .btn{
+            display: flex;
+            align-items: center;
+            padding: 4px 10px;
+            gap: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #b5b0b0;
+            color: black;
+            transition-duration: 0.4s;
+        }
+
+        .btn:hover{
+            background-color:#292727;
+            color: white;
+        }
+
+    }
+
+    .editor-body{
+        flex-grow: 1;
+    }
+    .editor-left-container, .editor-right-container{
+        display: flex;
+        padding: 10px;
+        gap: 10px;
+        border: none;
+        align-items: center;
+    }
+
+
+}
