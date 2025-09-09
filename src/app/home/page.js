@@ -4,17 +4,16 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from 'next/image';
 // Import your assets here. Make sure the paths are correct.
-import logo from '../assets/logo.png';
-import dashboardImg from '../screen/LandingPage/assets/images/home/dashboard.png';
-// import googleLogo from './assets/images/brand-logos/google.svg';
-// import microsoftLogo from './assets/images/brand-logos/microsoft.svg';
-// import adobeLogo from './assets/images/brand-logos/adobe.svg';
-// import airbnbLogo from './assets/images/brand-logos/airbnb.svg';
-// import stripeLogo from './assets/images/brand-logos/stripe.svg';
-import insightsImg from '../screen/LandingPage/assets/images/home/insights.png';
-// import womenImg from '../screen/LandingPage/assets/images/people/women.jpg';
-import manImg from '../screen/LandingPage/assets/images/people/man.jpg';
-// import man2Img from './assets/images/people/man2.jpg';
+import dashboardImg from '@/screen/LandingPage/assets/images/home/dashboard.png';
+// import googleLogo from '@/screen/LandingPage/assets/images/brand-logos/google.svg';
+// import microsoftLogo from '@/screen/LandingPage/assets/images/brand-logos/microsoft.svg';
+// import adobeLogo from '@/screen/LandingPage/assets/images/brand-logos/adobe.svg';
+// import airbnbLogo from '@/screen/LandingPage/assets/images/brand-logos/airbnb.svg';
+// import stripeLogo from '@/screen/LandingPage/assets/images/brand-logos/stripe.svg';
+import insightsImg from '@/screen/LandingPage/assets/images/home/insights.png';
+// import womenImg from '@/screen/LandingPage/assets/images/people/women.jpg';
+import manImg from '@/screen/LandingPage/assets/images/people/man.jpg';
+// import man2Img from '@/screen/LandingPage/assets/images/people/man2.jpg';
 
 
 // Import the necessary CSS files
@@ -168,7 +167,7 @@ const LandingPage = () => {
                 <header className="LPheader" id='about'>
                     {/* Logo */}
                     <a className="a logo-container">
-                        <Image src={logo} alt="logo" width={40} height={40} />
+                        <Image src="/logo.png" alt="logo" width={40} height={40} />
                         <span className="logo-text">CodeXSync</span>
                     </a>
 
@@ -474,7 +473,7 @@ const LandingPage = () => {
 
                 <footer className="tw-mt-auto tw-flex tw-w-full tw-place-content-around tw-gap-3 tw-p-[5%] tw-px-[10%] tw-text-white max-md:tw-flex-col">
                     <div className="tw-flex tw-h-full tw-w-[250px] tw-flex-col tw-place-items-center tw-gap-6 max-md:tw-w-full">
-                        <Image src={logo} alt="logo" className="tw-max-w-[120px]" />
+                        <Image src="/logo.png" alt="logo" className="tw-max-w-[120px]" height={120} width={120} />
                         <div>Mumbai,India</div>
                         
                     </div>

@@ -48,7 +48,8 @@ const PlaygroundScreen = () => {
                          <b>Input:</b>
 
                     </div>
-                    <textarea value={input} onChange={(e) => setInput(e.target.value)}></textarea>
+                    <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Enter Input here" className="input-textarea"></textarea>
+                    <div className="input-bottom-text">If your code takes input, add it in the above box before running.</div>
                 </div>
 
                 <div className="input-output-container">
