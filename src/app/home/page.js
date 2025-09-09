@@ -4,16 +4,16 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from 'next/image';
 // Import your assets here. Make sure the paths are correct.
-import logo from '../assets/logo.png';
-import dashboardImg from '../screen/LandingPage/assets/images/home/dashboard.png';
+import logo from '@/assets/logo.png';
+import dashboardImg from '@/screen/LandingPage/assets/images/home/dashboard.png';
 // import googleLogo from './assets/images/brand-logos/google.svg';
 // import microsoftLogo from './assets/images/brand-logos/microsoft.svg';
 // import adobeLogo from './assets/images/brand-logos/adobe.svg';
 // import airbnbLogo from './assets/images/brand-logos/airbnb.svg';
 // import stripeLogo from './assets/images/brand-logos/stripe.svg';
-import insightsImg from '../screen/LandingPage/assets/images/home/insights.png';
+import insightsImg from '@/screen/LandingPage/assets/images/home/insights.png';
 // import womenImg from '../screen/LandingPage/assets/images/people/women.jpg';
-import manImg from '../screen/LandingPage/assets/images/people/man.jpg';
+import manImg from '@/screen/LandingPage/assets/images/people/man.jpg';
 // import man2Img from './assets/images/people/man2.jpg';
 
 
@@ -312,14 +312,14 @@ const LandingPage = () => {
                                     <div className="tw-text-4xl max-md:tw-text-2xl"><i className="bi bi-box-arrow-in-down"></i></div>
                                     <div className="tw-flex tw-flex-col tw-gap-4">
                                         <h3 className="h3 tw-text-2xl max-md:tw-text-xl">Effortless Import/Export</h3>
-                                        <p className="p tw-text-gray-300 max-md:tw-text-sm">Bring your existing code into CodeXSync with a simple import, and export your entire project when you're ready to deploy.</p>
+                                        <p className="p tw-text-gray-300 max-md:tw-text-sm">Bring your existing code into CodeXSync with a simple import, and export your entire project when you&apos;re ready to deploy.</p>
                                     </div>
                                 </div>
                                 <div className="reveal-up tw-flex tw-h-[200px] tw-w-[450px] tw-gap-8 tw-rounded-xl tw-border-[1px] tw-border-outlineColor tw-bg-secondary tw-p-8 max-md:tw-w-[320px]">
                                     <div className="tw-text-4xl max-md:tw-text-2xl"><i className="bi bi-people-fill"></i></div>
                                     <div className="tw-flex tw-flex-col tw-gap-4">
                                         <h3 className="h3 tw-text-2xl max-md:tw-text-xl">Solo & Team Modes</h3>
-                                        <p className="p tw-text-gray-300 max-md:tw-text-sm">Perfect for team sprints and solo projects alike. Collaborate when you need to, and fly solo when you don't.</p>
+                                        <p className="p tw-text-gray-300 max-md:tw-text-sm">Perfect for team sprints and solo projects alike. Collaborate when you need to, and fly solo when you don&apos;t.</p>
                                     </div>
                                 </div>
                                 <div className="reveal-up tw-flex tw-h-[200px] tw-w-[450px] tw-gap-8 tw-rounded-xl tw-border-[1px] tw-border-outlineColor tw-bg-secondary tw-p-8 max-md:tw-w-[320px]">
@@ -352,7 +352,7 @@ const LandingPage = () => {
                                 <h3 className="h3 tw-text-4xl tw-font-medium max-md:tw-text-2xl">How It Works?</h3>
                                 <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3">
                                     <h4 className="h4 tw-text-xl tw-font-medium">1.Create Your Project</h4>
-                                    <span className="tw-text-lg tw-text-gray-300 max-md:tw-text-base">Start a new project with a single click. It's your dedicated, cloud-based folder, ready for you to add and manage all your code files.</span>
+                                    <span className="tw-text-lg tw-text-gray-300 max-md:tw-text-base">Start a new project with a single click. It&apos;s your dedicated, cloud-based folder, ready for you to add and manage all your code files.</span>
                                 </div>
                                 <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3">
                                     <h4 className="h4 tw-text-xl tw-font-medium">2.Add Your Team by Email</h4>
@@ -360,7 +360,7 @@ const LandingPage = () => {
                                 </div>
                                 <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3">
                                     <h4 className="h4 tw-text-xl tw-font-medium">3.Code & Collaborate Live</h4>
-                                    <span className="tw-text-lg tw-text-gray-300 max-md:tw-text-base">Start coding from scratch in our powerful editor. Run your code instantly and watch your team's cursors fly as you build your next great project together, in perfect sync.</span>
+                                    <span className="tw-text-lg tw-text-gray-300 max-md:tw-text-base">Start coding from scratch in our powerful editor. Run your code instantly and watch your team&apos;s cursors fly as you build your next great project together, in perfect sync.</span>
                                 </div>
                             </div>
                             
@@ -450,7 +450,7 @@ const LandingPage = () => {
                                 <div className="faq-accordion tw-flex tw-w-full tw-select-none tw-text-xl max-md:tw-text-lg">
                                     <span>Can I use my existing code?</span><i className="bi bi-plus tw-ml-auto tw-font-semibold"></i>
                                 </div>
-                                <div className="content">Yes. While you can't upload a whole project at once, you can easily import the code from any local file directly into our editor. Just create a new file in your project and select the 'Import' option.</div>
+                                <div className="content">Yes. While you can&apos;t upload a whole project at once, you can easily import the code from any local file directly into our editor. Just create a new file in your project and select the &apos;Import&apos; option.</div>
                             </div>
                             <div className="faq tw-w-full tw-rounded-md tw-border-[1px] tw-border-solid tw-border-[#1F2123] tw-bg-[#080808]">
                                 <div className="faq-accordion tw-flex tw-w-full tw-select-none tw-text-xl max-md:tw-text-lg">
