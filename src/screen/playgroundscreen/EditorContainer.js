@@ -4,11 +4,10 @@ import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
 
-const EditorContainer = ({ onCodeRun, input }) => {
+const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
 
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState("c");
-    const [theme, setTheme] = useState("vs-dark");
 //    const [isFullSCreen, setFullSCreen] = useState(false)
 
     const [isProcessing, setIsProcessing] = useState(false); 
@@ -107,7 +106,7 @@ const EditorContainer = ({ onCodeRun, input }) => {
 
     return(
         <div className="root-editor-container" >
-            <div className="editor-header">
+            <div className={`editor-header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
                 <div className="editor-left-container">
                     <b className="title">{"title of the card"}</b>
                     <span className="material-icons">edit</span>
@@ -149,7 +148,7 @@ const EditorContainer = ({ onCodeRun, input }) => {
                     value={code}
                 />
             </div>
-            <div className="editor-footer">
+            <div className={`editor-footer ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
                 <button className="btn" onClick={fullscreen} disabled={isProcessing} >
                     <span className="material-icons">fullscreen</span>
                     <span>Full Screen</span>

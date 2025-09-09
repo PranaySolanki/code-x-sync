@@ -8,6 +8,7 @@ const PlaygroundScreen = () => {
 
     const [output, setOutput] = useState('');
     const [input, setInput] = useState('');
+    const [theme, setTheme] = useState("vs-light");
 
     const ExportOutput = () => {
         const outputText = output.text;
@@ -30,17 +31,17 @@ const PlaygroundScreen = () => {
 
     return (
         <div className="playground-container">
-            <div className="header">
+            <div className={`header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
 
                 <Image src="/logo.png" className="logo" alt="logo" width={90} height={90}/>
                 <span className="beside-logo"> CodeXsync</span>
 
             </div>
 
-            <div className="content-container">
+            <div className={`content-container ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
 
                 <div className="editor-container">
-                    <EditorContainer onCodeRun={setOutput} input={input}/>
+                    <EditorContainer theme={theme} setTheme={setTheme} onCodeRun={setOutput} input={input}/>
                 </div>
                 <div className="input-output-container">
                     <div className="input-header">

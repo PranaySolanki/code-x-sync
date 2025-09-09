@@ -1,6 +1,7 @@
 'use client';
 import "@/screen/loginscreen/index.scss";
 import { useState } from "react";
+import Script from 'next/script';
 
 const LoginScreen = () => {                                   // from export const to const and at end export default
   const [showRegister, setShowRegister] = useState(false);
@@ -92,14 +93,14 @@ const LoginScreen = () => {                                   // from export con
         </div>
       </div>
       {/* Ionicons Scripts */}
-      <script
+      <Script
         type="module"
         src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-      ></script>
-      <script
+      ></Script>
+      <Script
         noModule
         src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
-      ></script>
+      ></Script>
     </section>
   );
 };
