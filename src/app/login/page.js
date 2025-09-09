@@ -2,10 +2,43 @@
 import "@/screen/loginscreen/index.scss";
 import { useState } from "react";
 import Script from 'next/script';
+import supabase  from "@/helper/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 const LoginScreen = () => {                                   // from export const to const and at end export default
   const [showRegister, setShowRegister] = useState(false);
+  const [username, setusername] = useState("");
+  const [email, setemail] = useState("");
+  const [password, setpassword] = useState("");
+  const [message, setmessage] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setmessage("");
 
+    if (password !== confirmPassword) {
+      setmessage("Passwords do not match. Please enter the same password.");
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      username,
+      email,
+      password,
+    });
+    if (error) {
+      setmessage(error.message);
+    } else {
+      setmessage("Signup successful! Please check your email to confirm your account.");
+      setTimeout(() => {
+        setShowRegister(false); // Flip to login after success
+        setusername("");
+        setemail("");
+        setpassword("");
+        setConfirmPassword("");
+      }, 1500); // 1.5 seconds delay for user to read the message
+    }
+  };
   return (
     <section className="section">  
     {/* added class name by pranay */}
@@ -55,35 +88,48 @@ const LoginScreen = () => {                                   // from export con
         <div className="register-box box-face">
           <form action="/register" method="POST">
             <h2>Register</h2>
+            {message && <span>{message}</span>}
             <div className="input-box">
               <span className="icon">
                 <ion-icon name="person"></ion-icon>
               </span>
-              <input type="text" name="username" required />
+              <input
+                onChange={(e) => setusername(e.target.value)}
+                value={username}
+                type="text" name="username" required />
               <label htmlFor="username">Username:</label>
             </div>
             <div className="input-box">
               <span className="icon">
                 <ion-icon name="mail"></ion-icon>
               </span>
-              <input type="email" name="email" required />
+              <input 
+              onChange={(e) => {setemail(e.target.value);}}
+              value={email} 
+              type="email" name="email" required />
               <label htmlFor="email">Email:</label>
             </div>
             <div className="input-box">
               <span className="icon">
                 <ion-icon name="lock-closed"></ion-icon>
               </span>
-              <input type="password" name="password" required />
+              <input 
+                onChange={(e) => {setpassword(e.target.value);}}
+                value={password}
+                type="password" name="password" required />
               <label htmlFor="password">Password:</label>
             </div>
             <div className="input-box">
               <span className="icon">
                 <ion-icon name="lock-closed"></ion-icon>
               </span>
-              <input type="password" name="confirmPassword" required />
+              <input
+                 onChange={(e) => setConfirmPassword(e.target.value)}
+                value={confirmPassword}
+                type="password" name="confirmPassword" required />
               <label htmlFor="confirmPassword">Confirm Password:</label>
             </div>
-            <button type="submit">Register</button>
+            <button onClick={handleSubmit} type="submit" >Register</button>
             <div className="register-link">
               Already have an account?{" "}
               <a
