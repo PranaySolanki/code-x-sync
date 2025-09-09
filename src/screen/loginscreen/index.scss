@@ -20,7 +20,7 @@
   .login-register-container {
     position: relative;
     width: 400px;
-    height: 450px;
+    min-height: 450px;
     perspective: 1200px;
     display: flex;
     justify-content: center;

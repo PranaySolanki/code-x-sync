@@ -57,6 +57,13 @@ const LoginScreen = () => {                                   // from export con
             <h2>Register</h2>
             <div className="input-box">
               <span className="icon">
+                <ion-icon name="person"></ion-icon>
+              </span>
+              <input type="text" name="username" required />
+              <label htmlFor="username">Username:</label>
+            </div>
+            <div className="input-box">
+              <span className="icon">
                 <ion-icon name="mail"></ion-icon>
               </span>
               <input type="email" name="email" required />
@@ -80,7 +87,7 @@ const LoginScreen = () => {                                   // from export con
             <div className="register-link">
               Already have an account?{" "}
               <a
-                href="/login"
+                href="#"
                 onClick={(e) => {
                   e.preventDefault();
                   setShowRegister(false);
