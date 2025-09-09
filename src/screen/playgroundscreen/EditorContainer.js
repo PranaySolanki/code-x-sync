@@ -70,9 +70,10 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
 
     }
 
-    const onChangeTheme = (event) => {
-        setTheme(event.target.value);
+    const onChangeTheme = () => {
+        setTheme(theme === 'vs-light' ? 'vs-dark' : 'vs-light');
     }
+   
 
     const fullscreen = () => {
 
@@ -110,7 +111,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
                 <div className="editor-left-container">
                     <b className="title">{"title of the card"}</b>
                     <span className="material-icons">edit</span>
-                    <button disabled={isProcessing}>Save Code</button>
+                    <button className="saveBtn" disabled={isProcessing}>Save Code</button>
                 </div>
 
                 <div className="editor-right-container">
@@ -121,10 +122,13 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
                         <option value="python">Python</option>
                     </select>
 
-                    <select onChange={onChangeTheme} value={theme} disabled={isProcessing}>
-                        <option value="vs-dark">Dark Mode</option>
-                        <option value="vs-light">Light Mode</option>  
-                    </select>
+                    <button onClick={onChangeTheme} className="theme-toggle-btn" disabled={isProcessing}>
+                        {theme === 'vs-light' ? (
+                            <span className="material-symbols-outlined">dark_mode</span>
+                        ) : (
+                            <span className="material-symbols-outlined">light_mode</span>
+                        )}
+                     </button>
 
                 </div>
             </div>
