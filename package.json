@@ -5,10 +5,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "concurrently \"npm:next-start\" \"npm:build:landing-css\"",
-    "next-start": "next start",
-    "lint": "eslint",
-    "build:landing-css": "npx tailwindcss --postcss -i ./src/screen/LandingPage/css/tailwind.css -o ./src/screen/LandingPage/css/tailwind-runtime.css -w"
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -26,7 +24,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "postcss": "^8.5.6",
