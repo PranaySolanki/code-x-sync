@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "npm:next-start",
+    "start": "next-start",
     "next-start": "next start",
     "lint": "eslint"
   },
