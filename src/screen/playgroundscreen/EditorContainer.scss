@@ -26,9 +26,12 @@
         
         select {
             
-            padding: 6px 10px;
+            padding: 6px ;
             border-radius: 4px;
             font-size: 14px;
+            width: 100px;
+            margin-left: 10px;
+            cursor: pointer;
 
         // remove default browser arrow 
         //   appearance: none;
@@ -43,26 +46,46 @@
         background: none;
         border: none;
         cursor: pointer;
+        margin-right: 30px;
+        
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
 
-        .material-icons {
-            font-size: 24px;
-            color: var(--icon-color); // Use a CSS variable for theme colors
         }
+
+        .material-symbols-outlined {
+            font-size: 25px;
+            font-variation-settings: 'wght' 100;
+            transition: transform 0.2s ease-in-out;
+            
         }
+        .material-symbols-outlined:hover{
+            transform: scale(1.04);
+            font-variation-settings: 'wght' 300;
+            cursor: pointer;
+        }
+            
+        .btn{
+            border: none;
+            background: none;
+        }
+        
+        
+
+      
     }
     .editor-footer{
         padding: 10px;
         display: flex;
-        justify-content: space-between;
+        justify-content: end;
 
-        .btn{
+        .Runbtn{
             display: flex;
             align-items: center;
             justify-content: center;
+            
             padding: 6px 14px;
             gap: 8px;
             border: none;
@@ -78,9 +101,10 @@
 
         }
 
-        .btn:hover{
+        .Runbtn:hover{
             background-color:#292727;
             color: white;
+            cursor: pointer;
         }
 
     }
@@ -105,10 +129,16 @@
             border: 1px solid #969494;
         
         }
-        .btn{
-          background-color: #d8d8d8;
-           border: 1px solid #969494;
+        .Runbtn{
+            background-color: #d8d8d8;
+            border: 1px solid #969494;
          
+        }
+        .material-symbols-outlined{
+            color: #2c2c2c;
+            .btn:hover{
+                color: black;
+            }
         }
     }
 
@@ -121,14 +151,20 @@
             border: 1px solid #3c3c3c;
 
         }
-        .btn{
-             background-color:#24262c;
+        .Runbtn{
+            background-color:#24262c;
             color: #d4d4d4;
             border: 1px solid #929191;
         }
-        .btn:hover{
-           background-color:#e1dede;
+        .Runbtn:hover{
+            background-color:#e1dede;
             color:black;
+        }
+        .material-symbols-outlined{
+            color: #d4d4d4;
+            .btn:hover{
+                color: white;
+            }
         }
     }
 

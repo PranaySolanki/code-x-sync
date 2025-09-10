@@ -17,14 +17,17 @@
         gap: 2px;
         background-color: #EDEDED;
         grid-template-columns: 3fr 2fr;
-        grid-template-rows: 1fr 1.2fr;
-
     }
 
     .logo {
         height: 55px;
-        width: auto;
-       
+        width: auto;  
+    }
+    .beside-logo{
+      align-self: center;
+      margin-left: 10px;
+      font-weight: 600;
+      font-size: large;
     }
 
     .header {
@@ -33,6 +36,7 @@
         //background-color: #1E1E1E;
         padding: 10px ;
     }
+    
 
     .input-output-container {
         //background-color: white;
@@ -53,19 +57,32 @@
            
         }
 
+
         textarea {
             flex-grow: 1;
             border: none;
             resize: none;
             padding: 10px;
-            font-size: 18px;
-            
+            font-size: 18px; 
+            border-radius: 10px;
+            margin: 5px;           
+        }
+        .input-textarea{
+          border-radius: 10px;
+          flex-grow: 0.5;
+          margin: 5px;
         }
 
         textarea:focus {
             outline: none;
         }
+        .exportBtn{
+          cursor: pointer;
+        }
+        
+        
     }
+    
      
      .light-theme {
   background-color: rgb(177, 176, 176);
@@ -90,6 +107,9 @@
       background-color: rgb(216, 216, 216);
     }
   }
+  .beside-logo{
+    color: black;
+  }
 }
 
 
@@ -100,7 +120,7 @@
         }
         .input-output-container {
         background-color: #24262c;
-         color:#d7d7d7;
+        color:#d7d7d7;
         .input-bottom-text{
              background-color: #2c2e35;
              color: #d7d7d7; 
@@ -114,6 +134,9 @@
     .output-header {
       background-color:#24262c;
     }
+  }
+  .beside-logo{
+    color: white;
   }
 }
     .input-bottom-text {
@@ -140,5 +163,7 @@
     .error-text {
     color: red;
     }
+
+    
    
 }
