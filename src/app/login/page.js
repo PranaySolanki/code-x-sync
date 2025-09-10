@@ -25,23 +25,42 @@ const LoginScreen = () => {                                   // from export con
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    const { data:userData, error:authError } = await supabase.auth.signUp({
       username,
       email,
       password,
     });
-    if (error) {
-      setmessage(error.message);
-    } else {
-      setmessage("Signup successful! Please check your email to confirm your account.");
-      setTimeout(() => {
-        setShowRegister(false); // Flip to login after success
-        setusername("");
-        setemail("");
-        setpassword("");
-        setConfirmPassword("");
-      }, 1500); // 1.5 seconds delay for user to read the message
-    }
+    if (authError) 
+      {
+        setmessage(authError.message);
+        return;
+      } else 
+        {
+          const userId = userData.user.id;
+          // 2. Insert the display name into the profiles table pranay
+          const { data: profileData, error: profileError } = await supabase
+          .from('User-Table')
+          .insert([{
+            user_id: userId,
+            user_name: username,
+            email_id:email
+          }]);
+
+            if (profileError) {
+              console.log('Profile Creation Error:', profileError.message);
+            }else{
+
+            setmessage("Signup successful! Please check your email to confirm your account.");
+            setTimeout(() => {
+              setShowRegister(false); // Flip to login after success
+              setusername("");
+              setemail("");
+              setpassword("");
+              setConfirmPassword("");
+              setmessage("");
+            }, 1500); // 1.5 seconds delay for user to read the message
+          }
+      }
   };
 
   const handleLogin = async (e) => {
@@ -129,7 +148,7 @@ const LoginScreen = () => {                                   // from export con
                 onChange={(e) => setusername(e.target.value)}
                 value={username}
                 type="text" name="username" required />
-              <label htmlFor="username">Username:</label>
+              <label htmlFor="username">Full Name:</label>
             </div>
             <div className="input-box">
               <span className="icon">
