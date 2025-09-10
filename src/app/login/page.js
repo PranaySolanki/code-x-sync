@@ -200,10 +200,7 @@ const LoginScreen = () => {                                   // from export con
       <Script
         type="module"
         src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-      ></Script>
-      <Script
-        noModule
-        src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+        crossOrigin="" // Add this
       ></Script>
     </section>
   );
