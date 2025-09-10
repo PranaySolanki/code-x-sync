@@ -1,52 +1,117 @@
 .root-editor-container{
-    background-color: none;
+    background-color: inherit;
     height: 100%;
     display: flex;
     flex-direction: column;
+    
 
     .editor-header {
         display: flex;
         justify-content: space-between;
-        button, select {
+        .saveBtn, select {
             padding: 10px 10px;
             border-radius: 7px;
         }
-        button{
+        .saveBtn{
             border: none;
             background-color:rgb(31, 167, 212) ;
             cursor: pointer;
             transition-duration: 0.4s;
         }
-        button:hover{
+        .saveBtn:hover{
             background-color: rgb(0, 112, 150);
         }
         .title{
             font-size: 20px;
         }
-        select:focus{
+        
+        select {
+            
+            padding: 6px ;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100px;
+            cursor: pointer;
+
+        // remove default browser arrow 
+        //   appearance: none;
+        //    -webkit-appearance: none;
+        //   -moz-appearance: none;
+
+        }:focus{
             outline: none;
         }
+        /* Add this to your EditorContainer.scss */
+        .theme-toggle-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+        
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        }
+
+        .material-symbols-outlined,.material-icons {
+            font-size: 25px;
+            font-variation-settings: 'wght' 300;
+            transition: transform 0.1s ease-in-out;
+            
+        }
+        .material-symbols-outlined:hover,.material-icons:hover{
+            transform: scale(1.04);
+            font-variation-settings: 'wght' 350;
+            cursor: pointer;
+        }
+        .back-to-dashboard{
+            margin-top: 5px;
+            font-variation-settings: 'wght' 550;
+        }
+        .back-to-dashboard:hover{
+            font-variation-settings: 'wght' 700;
+        }
+            
+        .btn{
+            border: none;
+            background: none;
+        }
+        
+        
+
+      
     }
     .editor-footer{
         padding: 10px;
         display: flex;
-        justify-content: space-between;
+        justify-content: end;
 
-        .btn{
+        .Runbtn{
             display: flex;
             align-items: center;
-            padding: 4px 10px;
-            gap: 10px;
+            justify-content: center;
+            
+            padding: 6px 14px;
+            gap: 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             color: black;
             transition-duration: 0.4s;
+             font-size: 14px; 
+             min-width: 120px; 
+             height: 36px; 
+            box-sizing: border-box; 
+             text-align: center; 
+
         }
 
-        .btn:hover{
+        .Runbtn:hover{
             background-color:#292727;
             color: white;
+            cursor: pointer;
         }
 
     }
@@ -65,22 +130,56 @@
      .light-theme{
         background-color: rgb(216, 216, 216);
         color:#070707;
-        .btn{
-          background-color: #bbbaba;
-         
+        select {
+              background-color:#d8d8d8;
+              color: #000;
+            border: 2px solid #969494;
+        
+        }
+        .Runbtn{
+            background-color: #d8d8d8;
+            border: 1px solid #969494;   
+        }
+        .Runbtn:hover{
+            .runArrow{
+                color: white;
+            } 
+        }
+
+        .material-symbols-outlined, .material-icons{
+            color: #2c2c2c;
+            .btn:hover{
+                color: black;
+            }
         }
     }
 
     .dark-theme{
-        background-color:rgb(100, 100, 100);
-        color: #fff;
-        .btn{
-             background-color:#292727;
-            color: white;
+        background-color:#24262c;
+        color: #d4d4d4;
+        select{
+             background-color: #1e1e1e; 
+            color: #d4d4d4;            
+            border: 2px solid #3c3c3c;
+
         }
-        .btn:hover{
-           background-color:#e1dede;
+        .Runbtn{
+            background-color:#24262c;
+            color: #d4d4d4;
+            border: 1px solid #929191;
+        }
+        .Runbtn:hover{
+            background-color:#e1dede;
             color:black;
+            .runArrow{
+                color: black;
+            }
+        }
+        .material-symbols-outlined, .material-icons{
+            color: #d4d4d4;
+            .btn:hover{
+                color: white;
+            }
         }
     }
 
