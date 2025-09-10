@@ -1,5 +1,6 @@
 .playground-container {
     height: 100vh;
+    max-height: 100vh;
     display: flex;
     flex-direction: column;
 
@@ -17,6 +18,12 @@
         gap: 2px;
         background-color: #EDEDED;
         grid-template-columns: 3fr 2fr;
+        grid-template-rows: auto 1fr;
+    }
+    .right-playground-container{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
     .logo {
@@ -69,8 +76,12 @@
         }
         .input-textarea{
           border-radius: 10px;
-          flex-grow: 0.5;
+          height: 100px;
           margin: 5px;
+        }
+        .error-text, .output-textarea{
+          margin-bottom: 9px ;
+
         }
 
         textarea:focus {
@@ -157,7 +168,7 @@
 
 
     .editor-container {
-    grid-row: 1 / 3;
+      grid-row: 1 / 3;
     }
 
     .error-text {

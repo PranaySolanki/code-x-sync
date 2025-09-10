@@ -3,6 +3,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    
 
     .editor-header {
         display: flex;
@@ -30,7 +31,6 @@
             border-radius: 4px;
             font-size: 14px;
             width: 100px;
-            margin-left: 10px;
             cursor: pointer;
 
         // remove default browser arrow 
@@ -46,7 +46,7 @@
         background: none;
         border: none;
         cursor: pointer;
-        margin-right: 30px;
+        margin-right: 10px;
         
         padding: 0;
         display: flex;
@@ -55,16 +55,23 @@
 
         }
 
-        .material-symbols-outlined {
+        .material-symbols-outlined,.material-icons {
             font-size: 25px;
-            font-variation-settings: 'wght' 100;
-            transition: transform 0.2s ease-in-out;
+            font-variation-settings: 'wght' 300;
+            transition: transform 0.1s ease-in-out;
             
         }
-        .material-symbols-outlined:hover{
+        .material-symbols-outlined:hover,.material-icons:hover{
             transform: scale(1.04);
-            font-variation-settings: 'wght' 300;
+            font-variation-settings: 'wght' 350;
             cursor: pointer;
+        }
+        .back-to-dashboard{
+            margin-top: 5px;
+            font-variation-settings: 'wght' 550;
+        }
+        .back-to-dashboard:hover{
+            font-variation-settings: 'wght' 700;
         }
             
         .btn{
@@ -126,15 +133,20 @@
         select {
               background-color:#d8d8d8;
               color: #000;
-            border: 1px solid #969494;
+            border: 2px solid #969494;
         
         }
         .Runbtn{
             background-color: #d8d8d8;
-            border: 1px solid #969494;
-         
+            border: 1px solid #969494;   
         }
-        .material-symbols-outlined{
+        .Runbtn:hover{
+            .runArrow{
+                color: white;
+            } 
+        }
+
+        .material-symbols-outlined, .material-icons{
             color: #2c2c2c;
             .btn:hover{
                 color: black;
@@ -148,7 +160,7 @@
         select{
              background-color: #1e1e1e; 
             color: #d4d4d4;            
-            border: 1px solid #3c3c3c;
+            border: 2px solid #3c3c3c;
 
         }
         .Runbtn{
@@ -159,8 +171,11 @@
         .Runbtn:hover{
             background-color:#e1dede;
             color:black;
+            .runArrow{
+                color: black;
+            }
         }
-        .material-symbols-outlined{
+        .material-symbols-outlined, .material-icons{
             color: #d4d4d4;
             .btn:hover{
                 color: white;

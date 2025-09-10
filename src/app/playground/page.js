@@ -1,6 +1,5 @@
 'use client';
 import "@/screen/playgroundscreen/index.scss"
-import ExportOutputBtn from '@mui/icons-material/IosShareOutlined'
 import React, { useState } from 'react';
 import  EditorContainer  from "@/screen/playgroundscreen/EditorContainer.js";
 import Image from 'next/image';
@@ -50,25 +49,26 @@ const PlaygroundScreen = () => {
                     <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Enter Input here" className="input-textarea"></textarea>
                     <div className="input-bottom-text">If your code takes input, add it in the above box before running.</div>
                 </div>
-
+               
                 <div className="input-output-container">
                     <div className="output-header">
                         <div className="output-text">
                             <b>Output:</b>
                         </div>
                         <label htmlFor="output-file-export" className="icon-container exportBtn" onClick={ExportOutput}>
-                        <ExportOutputBtn className=""/>
-                        <b>Export output</b>
+                        <span className="material-symbols-outlined">ios_share</span>
+                        <b>Export Output</b>
                         </label>
                         {/* <button style={{ display: 'none' }} id="output-file-export">
                             Export Output</button> */}
                     </div>
                     <textarea  
-                        className={output.isError ? "error-text" : ""} 
+                        className={output.isError ? "error-text" : "output-textarea"} 
                         value={output.text} 
                         readOnly>
                     </textarea>
                 </div>
+                
             </div>
         </div>
     );

@@ -3,7 +3,6 @@ import { useRef, useState } from "react";
 import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
-import { PlayArrow,DarkModeOutlined,LightModeOutlined,FileDownloadOutlined,FileUploadOutlined,FullscreenOutlined } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
 
 const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
@@ -107,31 +106,38 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
         }
   };
 
+
     return(
         <div className="root-editor-container" >
             <div className={`editor-header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
                 <div className="editor-left-container">
+                    <a href="/dashboard">
+                        <Tooltip title="Back to Dashboard" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                            <span className="material-symbols-outlined back-to-dashboard">arrow_back</span> 
+                        </Tooltip>
+                    </a>
+                    
                     <b className="title">{"title of the card"}</b>
                     <span className="material-icons">edit</span>
                     <button className="saveBtn" disabled={isProcessing}>Save Code</button>
                 </div>
 
                 <div className="editor-right-container">
-                    <Tooltip title="Full Screen" placement="bottom" arrow enterDelay={100}>
+                    <Tooltip title="Full Screen" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
                         <button className="btn" onClick={fullscreen} disabled={isProcessing} >
-                            <FullscreenOutlined className="material-symbols-outlined"/>
+                            <span className="material-symbols-outlined">fullscreen</span>
                         </button>
                     </Tooltip>
-                <Tooltip title="Upload Code" placement="bottom" arrow enterDelay={100}>  
+                <Tooltip title="Upload Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>  
                     <label htmlFor="import-code" className="btn" disabled={isProcessing} >
-                    <FileUploadOutlined className="material-symbols-outlined"/>
+                    <span className="material-symbols-outlined">file_upload</span>
                     </label>
                     <input type="file" id="import-code" style={{display: "none"}} onChange={ImportCode} disabled={isProcessing}/>
                 </Tooltip>
 
-                <Tooltip title="Download Code" placement="bottom" arrow enterDelay={100}>
+                <Tooltip title="Download Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
                     <button className="btn" onClick={exportCode} disabled={isProcessing} >
-                        <FileDownloadOutlined className="material-symbols-outlined" />
+                        <span className="material-symbols-outlined" >file_download</span>
                     </button>
                 </Tooltip>
 
@@ -145,12 +151,12 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
 
                     <button onClick={onChangeTheme} className="theme-toggle-btn" disabled={isProcessing}>
                         {theme === 'vs-light' ? (
-                            <Tooltip title="Dark Mode" placement="bottom" arrow enterDelay={100}>
-                                <DarkModeOutlined className="material-symbols-outlined dark"/>
+                            <Tooltip title="Dark Mode" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                                <span className="material-symbols-outlined dark">dark_mode</span>
                             </Tooltip>
                         ) : (
-                            <Tooltip title="Light Mode" placement="bottom" arrow enterDelay={100}>
-                                <LightModeOutlined className="material-symbols-outlined light"/>
+                            <Tooltip title="Light Mode" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                                <span className="material-symbols-outlined light">light_mode</span>
                             </Tooltip>
                         )}
                      </button>
@@ -192,7 +198,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
                     <span>Export Code</span>
                 </button> */}
                 <button className="Runbtn" onClick={RunCode} disabled={isProcessing} >
-                    <PlayArrow className="material-icons"/>
+                    <span className="material-icons runArrow">play_arrow</span>
                     <span>{isProcessing ? "Running..." : "Run Code"}</span>
                 </button>
             </div>
