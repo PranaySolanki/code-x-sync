@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
+import { Tooltip } from "@mui/material";
 
 const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
 
@@ -105,16 +106,42 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
         }
   };
 
+
     return(
         <div className="root-editor-container" >
             <div className={`editor-header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
                 <div className="editor-left-container">
+                    <a href="/dashboard">
+                        <Tooltip title="Back to Dashboard" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                            <span className="material-symbols-outlined back-to-dashboard">arrow_back</span> 
+                        </Tooltip>
+                    </a>
+                    
                     <b className="title">{"title of the card"}</b>
                     <span className="material-icons">edit</span>
                     <button className="saveBtn" disabled={isProcessing}>Save Code</button>
                 </div>
 
                 <div className="editor-right-container">
+                    <Tooltip title="Full Screen" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                        <button className="btn" onClick={fullscreen} disabled={isProcessing} >
+                            <span className="material-symbols-outlined">fullscreen</span>
+                        </button>
+                    </Tooltip>
+                <Tooltip title="Upload Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>  
+                    <label htmlFor="import-code" className="btn" disabled={isProcessing} >
+                    <span className="material-symbols-outlined">file_upload</span>
+                    </label>
+                    <input type="file" id="import-code" style={{display: "none"}} onChange={ImportCode} disabled={isProcessing}/>
+                </Tooltip>
+
+                <Tooltip title="Download Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                    <button className="btn" onClick={exportCode} disabled={isProcessing} >
+                        <span className="material-symbols-outlined" >file_download</span>
+                    </button>
+                </Tooltip>
+
+
                     <select onChange={onChangeLanguage} value={language} disabled={isProcessing}>
                         <option value="c">C</option>
                         <option value="java">Java</option>
@@ -124,9 +151,13 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
 
                     <button onClick={onChangeTheme} className="theme-toggle-btn" disabled={isProcessing}>
                         {theme === 'vs-light' ? (
-                            <span className="material-symbols-outlined">dark_mode</span>
+                            <Tooltip title="Dark Mode" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                                <span className="material-symbols-outlined dark">dark_mode</span>
+                            </Tooltip>
                         ) : (
-                            <span className="material-symbols-outlined">light_mode</span>
+                            <Tooltip title="Light Mode" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                                <span className="material-symbols-outlined light">light_mode</span>
+                            </Tooltip>
                         )}
                      </button>
 
@@ -153,7 +184,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
                 />
             </div>
             <div className={`editor-footer ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
-                <button className="btn" onClick={fullscreen} disabled={isProcessing} >
+                {/* <button className="btn" onClick={fullscreen} disabled={isProcessing} >
                     <span className="material-icons">fullscreen</span>
                     <span>Full Screen</span>
                 </button>
@@ -165,9 +196,9 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
                 <button className="btn" onClick={exportCode} disabled={isProcessing} >
                     <span className="material-icons" >cloud_upload</span>
                     <span>Export Code</span>
-                </button>
-                <button className="btn" onClick={RunCode} disabled={isProcessing} >
-                    <span className="material-icons">play_arrow</span>
+                </button> */}
+                <button className="Runbtn" onClick={RunCode} disabled={isProcessing} >
+                    <span className="material-icons runArrow">play_arrow</span>
                     <span>{isProcessing ? "Running..." : "Run Code"}</span>
                 </button>
             </div>
