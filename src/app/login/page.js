@@ -4,6 +4,7 @@ import { useState } from "react";
 import Script from 'next/script';
 import supabase  from "@/helper/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation"; // Add this import
 
 const LoginScreen = () => {                                   // from export const to const and at end export default
   const [showRegister, setShowRegister] = useState(false);
@@ -12,6 +13,9 @@ const LoginScreen = () => {                                   // from export con
   const [password, setpassword] = useState("");
   const [message, setmessage] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loginMessage, setLoginMessage] = useState(""); // State for login message
+  const router = useRouter(); // Initialize router
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setmessage("");
@@ -39,14 +43,40 @@ const LoginScreen = () => {                                   // from export con
       }, 1500); // 1.5 seconds delay for user to read the message
     }
   };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginMessage(""); // Clear previous message
+
+    const { email, password } = e.target.elements;
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.value,
+      password: password.value,
+    });
+
+    if (error) {
+      setLoginMessage(error.message);
+    } else {
+      setLoginMessage("Login successful!");
+      // Redirect or perform any other action after successful login
+      setTimeout(() => {
+        router.push("/"); // Redirect to home page
+      }, 1000); // 1 second delay for user to see the message
+    }
+  };
+
   return (
     <section className="section">  
     {/* added class name by pranay */}
       <div className={`login-register-container${showRegister ? " flipped" : ""}`}>
         {/* Login Box */}
         <div className="login-box box-face">
-          <form action="/login" method="POST">
+          <form onSubmit={handleLogin} style={{ textAlign: "center" }}>
             <h2>Login</h2>
+            {loginMessage && (
+              <span className="form-message">{loginMessage}</span>
+            )}
             <div className="input-box">
               <span className="icon">
                 <ion-icon name="mail"></ion-icon>
@@ -86,9 +116,11 @@ const LoginScreen = () => {                                   // from export con
         </div>
         {/* Registration Box */}
         <div className="register-box box-face">
-          <form action="/register" method="POST">
+          <form action="/register" method="POST" style={{ textAlign: "center" }}>
             <h2>Register</h2>
-            {message && <span>{message}</span>}
+            {message && (
+              <span className="form-message">{message}</span>
+            )}
             <div className="input-box">
               <span className="icon">
                 <ion-icon name="person"></ion-icon>
