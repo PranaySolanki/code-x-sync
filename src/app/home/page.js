@@ -491,13 +491,13 @@ const LandingPage = () => {
                         <div>Mumbai,India</div>
                         
                     </div>
-                    <div className="tw-flex tw-h-full tw-w-[250px] tw-flex-col tw-gap-4">
+                    {/* <div className="tw-flex tw-h-full tw-w-[250px] tw-flex-col tw-gap-4">
                         <h2 className="h2 tw-text-3xl max-md:tw-text-xl">Company</h2>
                         <div className="tw-flex tw-flex-col tw-gap-3 max-md:tw-text-sm">
                             <a href="#/" className="a footer-link">Use cases</a><a href="#/" className="a footer-link">Integrations</a>
                             <a href="#/" className="a footer-link">Change logs</a><a href="#/" className="a footer-link">Blogs</a><a href="#/" className="a footer-link">Contact</a>
                         </div>
-                    </div>
+                    </div> */}
                     <div className="tw-flex tw-h-full tw-w-[250px] tw-flex-col tw-gap-4">
                         <h2 className="h2 tw-text-3xl max-md:tw-text-xl">Resources</h2>
                         <div className="tw-flex tw-flex-col tw-gap-3 max-md:tw-text-sm">

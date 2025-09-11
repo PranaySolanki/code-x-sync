@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
@@ -12,9 +12,13 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [titleInput, setTitleInput] = useState(fileName || "Untitled");
 
-    const [isProcessing, setIsProcessing] = useState(false); 
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const codeRef = useRef();
+
+    useEffect(() => {
+        setTitleInput(fileName || "Untitled");
+    }, [fileName]);
 
     const onChangeCode = (newCode) => {
         codeRef.current = newCode;
@@ -118,8 +122,31 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                         </Tooltip>
                     </a>
                     
-                    <b className="title">{"title of the card"}</b>
-                    <span className="material-icons">edit</span>
+                    {isEditingTitle ? (
+                        <input
+                            type="text"
+                            value={titleInput}
+                            onChange={(e) => setTitleInput(e.target.value)}
+                            onBlur={() => {
+                                onTitleChange(titleInput);
+                                setIsEditingTitle(false);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    onTitleChange(titleInput);
+                                    setIsEditingTitle(false);
+                                } else if (e.key === 'Escape') {
+                                    setTitleInput(fileName || "Untitled");
+                                    setIsEditingTitle(false);
+                                }
+                            }}
+                            className="title-input"
+                            autoFocus
+                        />
+                    ) : (
+                        <b className="title" onClick={() => setIsEditingTitle(true)}>{fileName || "Untitled"}</b>
+                    )}
+                    <span className="material-icons" onClick={() => setIsEditingTitle(true)}>edit</span>
                     <button className="saveBtn" disabled={isProcessing}>Save Code</button>
                 </div>
 
