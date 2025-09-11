@@ -1,24 +1,64 @@
-import "@/screen/homescreen/index.scss";
-import  RightComponent  from "@/screen/homescreen/Rightcomponent/index.js";
-import Image from 'next/image';
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import supabase from "@/helper/supabaseClient";
+import { ModalProvider } from '../../context/ModalContext';
+import { PlaygroundProvider } from '../../context/PlaygroundContext';
+import Home from '../../components/Home';
 
-const HomeScreen = () => {
-    return(
-         < div className="home-container"> 
-            <div className="left-container">
-                <div className="item-container">
-                    <Image src="/logo.png" alt="logo" width={200} height={200}/>
-                    <h1> CodeXsync</h1>
-                    <h2>code.compile.debug</h2>
-                    <button>
-                        <span className="material-icons"> add </span>
-                        <span>  Create Project </span>
-                    </button>
-                 </div>
-            </div>
-            <RightComponent />
-         </div>
+const Dashboard = () => {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState(null);
 
-    ); 
-}
-export default HomeScreen;
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+
+                if (!session || error) {
+                    router.replace('/login');
+                    return;
+                }
+
+                setUser(session.user);
+            } catch (error) {
+                console.error('Auth check error:', error);
+                router.replace('/login');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkAuth();
+
+        // Set up auth state listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                router.replace('/login');
+            }
+        });
+
+        return () => {
+            subscription?.unsubscribe();
+        };
+    }, []);
+
+    if (isLoading) {
+        return <div className="loading">Loading...</div>;
+    }
+
+    if (!user) {
+        return null;
+    }
+
+    return (
+        <ModalProvider>
+            <PlaygroundProvider>
+                <Home />
+            </PlaygroundProvider>
+        </ModalProvider>
+    );
+};
+
+export default Dashboard;

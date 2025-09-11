@@ -5,11 +5,12 @@ import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
 import { Tooltip } from "@mui/material";
 
-const EditorContainer = ({ onCodeRun, input, theme, setTheme }) => {
+const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange }) => {
 
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState("c");
-//    const [isFullSCreen, setFullSCreen] = useState(false)
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [titleInput, setTitleInput] = useState(fileName || "Untitled");
 
     const [isProcessing, setIsProcessing] = useState(false); 
 
