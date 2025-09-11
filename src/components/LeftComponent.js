@@ -87,7 +87,8 @@ const LeftComponent = () => {
                         folderId: "",
                         cardId: "",
                     }
-                })} ><span>+</span> Create New Project</AddNewButton>
+                })} > 
+                 <span>+</span> Create New Project</AddNewButton>
             </ContentContainer>
         </StyledLeftComponent>
     );

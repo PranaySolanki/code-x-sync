@@ -376,7 +376,7 @@ const LandingPage = () => {
                         </div>
                     </section>
 
-                    <section className="tw-mt-5 tw-flex tw-min-h-[80vh] tw-w-full tw-flex-col tw-place-content-center tw-place-items-center tw-p-[2%]">
+                    {/* <section className="tw-mt-5 tw-flex tw-min-h-[80vh] tw-w-full tw-flex-col tw-place-content-center tw-place-items-center tw-p-[2%]">
                         <h3 className="h3 tw-text-4xl tw-font-medium tw-text-gray-200 max-md:tw-text-2xl">Meet the developers and founders</h3>
                         <div className="tw-mt-8 tw-gap-10 tw-space-y-8 max-md:tw-columns-1 lg:tw-columns-2 xl:tw-columns-2">
                             <div className="reveal-up tw-flex tw-h-fit tw-w-[350px] tw-break-inside-avoid tw-flex-col tw-gap-4 tw-rounded-lg tw-border-[1px] tw-border-outlineColor tw-bg-secondary tw-p-4 max-lg:tw-w-[320px]">
@@ -408,7 +408,7 @@ const LandingPage = () => {
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </section> */}
 
                     {/* <section className="tw-mt-5 tw-flex tw-w-full tw-flex-col tw-place-items-center tw-p-[2%]" id="pricing">
                         <h3 className="h3 tw-text-3xl tw-font-medium tw-text-gray-300 max-md:tw-text-2xl">Simple pricing</h3>
