@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import supabase from '../helper/supabaseClient';
+import supabase from '@/helper/supabaseClient';
 
 export const PlaygroundContext = createContext();
 
@@ -36,6 +36,7 @@ export const PlaygroundProvider = ({ children }) => {
 
         foldersObj[project.project_id] = {
           title: project.project_name,
+          sharedWith: project.team_email,
           playgrounds: files.reduce((acc, file) => {
             acc[file.file_id] = {
               title: file.file_name,
@@ -53,7 +54,7 @@ export const PlaygroundProvider = ({ children }) => {
   };
 
   const deleteFolder = async (folderId) => {
-    if (confirm("Are you sure you want to delete this folder? All playgrounds will be deleted.")) {
+    if (confirm("Are you sure you want to delete this project? All files related to this project will be deleted.")) {
       try {
         // Delete all files first
         const { error: filesError } = await supabase
@@ -80,7 +81,7 @@ export const PlaygroundProvider = ({ children }) => {
   };
 
   const deleteCard = async (folderId, cardId) => {
-    if (confirm("Are you sure you want to delete this playground?")) {
+    if (confirm("Are you sure you want to delete this file?")) {
       try {
         const { error } = await supabase
           .from('File-Table')
@@ -91,8 +92,8 @@ export const PlaygroundProvider = ({ children }) => {
 
         await fetchFolders();
       } catch (error) {
-        console.error('Error deleting playground:', error);
-        alert('Failed to delete playground');
+        console.error('Error deleting file:', error);
+        alert('Failed to delete file');
       }
     }
   };

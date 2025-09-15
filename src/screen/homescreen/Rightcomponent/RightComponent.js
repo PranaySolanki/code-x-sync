@@ -1,19 +1,17 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
-import { IoTrashOutline } from 'react-icons/io5';
-import { BiEditAlt } from 'react-icons/bi';
 import { FcOpenedFolder } from 'react-icons/fc';
 import Image from 'next/image';
-import logo from '../assets/logo.png';
-import { ModalContext } from '../context/ModalContext';
-import { PlaygroundContext } from '../context/PlaygroundContext';
+import logo from '@/assets/logo.png';
+import { ModalContext } from '@/screen/homescreen/components/Dialog_box_state';
+import { PlaygroundContext } from '@/screen/homescreen/components/DataStoreContext';
 import { useRouter } from 'next/navigation';
 
 const StyledRightComponent = styled.div`
     position: fixed;
     top: 0;
     left: 40%;
-    width: 57.5%;
+    width: 57%;
     padding: 2rem;
     background-color: white;
 
@@ -22,7 +20,9 @@ const StyledRightComponent = styled.div`
         width: 100%;
         padding: 1rem 0.5rem;
     }
+        
 `;
+
 
 const Header = styled.div`
   display: flex;
@@ -51,6 +51,7 @@ const AddButton = styled.div`
     color: black;
     display: flex;
     align-items: center;
+    transition: transform 0.3s ease-in-out;
     gap: 0.25rem;
     span{
         font-size: 1.5rem;
@@ -59,6 +60,7 @@ const AddButton = styled.div`
 
     &:hover{
         cursor: pointer;
+        transform: scale(1.1);
     }
 `;
 
@@ -84,37 +86,49 @@ const PlayGroundCards = styled.div`
 `;
 
 const Card = styled.div`
-    padding: .5rem;
+    padding: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-radius: 8px;
-    box-shadow: 0 0 4px 0px #989898;
+    width: 96%;
+    box-shadow: 2px 2px 5px gray;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.5s ease-in-out;
 
     &:hover{
-      scale: 1.05;
-      box-shadow: 0 0 8px 0px #989898;
+      scale: 1.02;
+      outline: 2px solid white;
+      box-shadow: 10px 10px 5px gray;
+      transition: all 0.3s ease-in-out;
     }
 `;
 
 const CardContainer = styled.div`
   display: flex;
-  align-items: center;
+  justify-content: space-between;
 `;
 
 const CardContent = styled.div`
 `;
 
 const Logo = styled(Image)`
-    width: 70px;
+    width: 50px;
+    height: 50px;
     margin-right: 1rem;
 
     @media (max-width: 425px){
         width: 50px;
         margin-right: 0.5rem;
     }
+`;
+
+const Icon = styled.span`
+  transition: transform 0.3s ease-in-out;
+  &:hover {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
 `;
 
 const RightComponent = () => {
@@ -136,7 +150,7 @@ const RightComponent = () => {
             folderId: "",
             cardId: "",
           }
-        })}> <span>+</span> New Project</AddButton>
+        })}> <span>+</span>New Project</AddButton>
       </Header>
 
       {
@@ -147,15 +161,26 @@ const RightComponent = () => {
                 <FcOpenedFolder /> {folder.title}
               </Heading>
               <FolderIcons>
-                <IoTrashOutline onClick={() => deleteFolder(folderId)} />
-                <BiEditAlt onClick={() => openModal({
+                <Icon className="material-icons" onClick={() => deleteFolder(folderId)}>delete</Icon>
+                <Icon className="material-icons" onClick={() => openModal({
                   show: true,
-                  modalType: 4,
+                  modalType: 3,
                   identifiers: {
                     folderId: folderId,
                     cardId: "",
+                    folderData: { title: folder.title }
                   }
-                })} />
+                })} >edit</ Icon>
+
+                <Icon className="material-icons" onClick={() => openModal({
+                  show: true,
+                  modalType: 5,
+                  identifiers: { folderId: folderId, 
+                    cardId: "", 
+                    folderData: { TeamEmails : folder.sharedWith || [] }
+                  }
+                })} >groups</Icon>
+                
                 <AddButton onClick={() => openModal({
                   show: true,
                   modalType: 2,
@@ -183,15 +208,16 @@ const RightComponent = () => {
                     <FolderIcons onClick={(e) => {
                       e.stopPropagation();
                     }}>
-                      <IoTrashOutline onClick={() => deleteCard(folderId, playgroundId)} />
-                      <BiEditAlt onClick={() => openModal({
+                      <Icon className="material-icons" onClick={() => deleteCard(folderId, playgroundId)} >delete</Icon>
+                      <Icon className="material-icons" onClick={() => openModal({
                         show: true,
-                        modalType: 5,
+                        modalType: 4,
                         identifiers: {
                           folderId: folderId,
                           cardId: playgroundId,
+                          fileData: { title: playground.title, language: playground.language }
                         }
-                      })} />
+                      })} >edit</Icon>
                     </FolderIcons>
                   </Card>
                 ))

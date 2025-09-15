@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import Image from 'next/image';
-import logo from '../assets/logo.png';
-import { ModalContext } from '../context/ModalContext';
+import logo from '@/assets/logo.png';
+import { ModalContext } from '@/screen/homescreen/components/Dialog_box_state';
 
 const StyledLeftComponent = styled.div`
     position: fixed;
@@ -82,7 +82,7 @@ const LeftComponent = () => {
                 <SubHeading>Code. Compile. Debug.</SubHeading>
                 <AddNewButton onClick={() => openModal({
                     show: true,
-                    modalType: 3,
+                    modalType: 1,
                     identifiers: {
                         folderId: "",
                         cardId: "",

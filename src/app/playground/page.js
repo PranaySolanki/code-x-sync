@@ -10,14 +10,15 @@ const PlaygroundScreen = () => {
     const searchParams = useSearchParams();
     const fileId = searchParams.get('fileId');
     const fileLanguage = searchParams.get('language');
-
     const fileNameParam = searchParams.get('fileName');
+
 
     const [output, setOutput] = useState('');
     const [input, setInput] = useState('');
     const [theme, setTheme] = useState("vs-light");
     const [code, setCode] = useState('');
     const [title, setTitle] = useState(fileNameParam || "Untitled");
+    const [language, setLanguage] = useState(fileLanguage || "c");
 
     useEffect(() => {
         if (fileId) {
@@ -28,9 +29,9 @@ const PlaygroundScreen = () => {
     const loadFileContent = async () => {
         // Load file content from database
         const { data, error } = await supabase
-            .from('files')
+            .from('File-Table')
             .select('content')
-            .eq('id', fileId)
+            .eq('file_id', fileId)
             .single();
         
         if (data) {
@@ -41,9 +42,9 @@ const PlaygroundScreen = () => {
     const saveCode = async (newCode) => {
         if (fileId) {
             const { data, error } = await supabase
-                .from('files')
+                .from('File-Table')
                 .update({ content: newCode })
-                .eq('id', fileId);
+                .eq('file_id', fileId);
         }
     };
 
@@ -51,9 +52,9 @@ const PlaygroundScreen = () => {
         setTitle(newTitle);
         if (fileId) {
             const { data, error } = await supabase
-                .from('files')
-                .update({ name: newTitle })
-                .eq('id', fileId);
+                .from('File-Table')
+                .update({ file_name: newTitle })
+                .eq('file_id', fileId);
         }
     };
 
@@ -90,7 +91,7 @@ const PlaygroundScreen = () => {
                     onCodeRun={setOutput} 
                     input={input}
                     code={code}
-                    language={fileLanguage?.toLowerCase()}
+                    code_language={language}
                     onCodeChange={saveCode}
                     fileName={title}
                     onTitleChange={saveTitle}
