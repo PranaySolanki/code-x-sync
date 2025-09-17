@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { FcOpenedFolder } from 'react-icons/fc';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
-import { ModalContext } from '@/screen/homescreen/components/Dialog_box_state';
-import { PlaygroundContext } from '@/screen/homescreen/components/DataStoreContext';
+import { ModalContext } from '@/screen/Dashboard/components/Dialog_box_state';
+import { PlaygroundContext } from '@/screen/Dashboard/components/DataStoreContext';
 import { useRouter } from 'next/navigation';
 
 const StyledRightComponent = styled.div`
@@ -168,7 +168,7 @@ const RightComponent = () => {
                   identifiers: {
                     folderId: folderId,
                     cardId: "",
-                    folderData: { title: folder.title }
+                    folderData: { ProjectTitle: folder.title }
                   }
                 })} >edit</ Icon>
 
@@ -196,7 +196,7 @@ const RightComponent = () => {
               {
                 Object.entries(folder.playgrounds).map(([playgroundId, playground]) => (
                   <Card key={playgroundId} onClick={() => {
-                    router.push(`/playground?fileId=${playgroundId}&fileName=${playground.title}&language=${playground.language}`);
+                    router.push(`/editor/${playgroundId}`);
                   }}>
                     <CardContainer>
                       <Logo src={logo} alt="logo" width={70} height={70} />

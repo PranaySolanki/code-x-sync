@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
-import { ModalContext } from '@/screen/homescreen/components/Dialog_box_state';
+import { ModalContext } from '@/screen/Dashboard/components/Dialog_box_state';
 
 const StyledLeftComponent = styled.div`
     position: fixed;

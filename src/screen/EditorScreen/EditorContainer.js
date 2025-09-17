@@ -8,16 +8,17 @@ import { Tooltip } from "@mui/material";
 const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange,code_language }) => {
 
     const [code, setCode] = useState('');
-    const [language, setLanguage] = useState(code_language || "c");
+    const [language, setLanguage] = useState(code_language);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
-    const [titleInput, setTitleInput] = useState(fileName || "Untitled");
+    const [titleInput, setTitleInput] = useState(fileName);
     const [isProcessing, setIsProcessing] = useState(false);
 
     const codeRef = useRef();
 
     useEffect(() => {
         setTitleInput(fileName || "Untitled");
-    }, [fileName]);
+        setLanguage(code_language);
+    }, [fileName], [code_language]);
 
     const onChangeCode = (newCode) => {
         codeRef.current = newCode;

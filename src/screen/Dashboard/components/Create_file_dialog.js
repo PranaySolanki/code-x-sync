@@ -119,7 +119,7 @@ const Modal = () => {
     language: 'c' 
   });
 
-  const [sharedEmails, setSharedEmails] = useState(isOpenModal.identifiers.folderData.TeamEmails);
+  const [sharedEmails, setSharedEmails] = useState([]);
   const [emailInput, setEmailInput] = useState('');
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -137,6 +137,8 @@ const Modal = () => {
     }if (isOpenModal.show && isOpenModal.modalType === 5 && isOpenModal.identifiers.folderData) {
       if(!isOpenModal.identifiers.folderData.TeamEmails) {
         setSharedEmails([]);
+      }else{
+        setSharedEmails(isOpenModal.identifiers.folderData.TeamEmails);
       }
     }
     else {
