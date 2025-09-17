@@ -8,6 +8,11 @@
     .editor-header {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: #d3d3d3;
+        border-bottom: 1px solid #ccc;
+        gap: 10px;
         .saveBtn, select {
             padding: 10px 10px;
             border-radius: 7px;
@@ -23,43 +28,36 @@
         }
         .title{
             font-size: 20px;
+            font-weight: 700;
         }
-        
+        .title .material-icons {
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 5px;
+        }
         select {
-            
             padding: 6px ;
             border-radius: 4px;
             font-size: 14px;
             width: 100px;
             cursor: pointer;
-
-        // remove default browser arrow 
-        //   appearance: none;
-        //    -webkit-appearance: none;
-        //   -moz-appearance: none;
-
         }:focus{
             outline: none;
         }
-        /* Add this to your EditorContainer.scss */
         .theme-toggle-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        margin-right: 10px;
-        
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
         .material-symbols-outlined,.material-icons {
             font-size: 25px;
             font-variation-settings: 'wght' 300;
             transition: transform 0.1s ease-in-out;
-            
         }
         .material-symbols-outlined:hover,.material-icons:hover{
             transform: scale(1.04);
@@ -73,15 +71,10 @@
         .back-to-dashboard:hover{
             font-variation-settings: 'wght' 700;
         }
-            
         .btn{
             border: none;
             background: none;
         }
-        
-        
-
-      
     }
     .editor-footer{
         padding: 10px;
