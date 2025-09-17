@@ -144,7 +144,8 @@ const Modal = () => {
       setFormData({
         ProjectTitle: '',
         FileTitle: '',
-        language: 'c'
+        language: 'c',
+        sharedEmails: []
       });
     }
   }, [isOpenModal]);
