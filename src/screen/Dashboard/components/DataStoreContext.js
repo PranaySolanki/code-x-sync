@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, use } from 'react';
 import supabase from '@/helper/supabaseClient';
 
 export const PlaygroundContext = createContext();
@@ -21,7 +21,7 @@ export const PlaygroundProvider = ({ children }) => {
       const { data: projectsData, error: projectsError } = await supabase
         .from('Project-Table')
         .select('*')
-        .eq('owner_id', user.id);
+        .or(`owner_id.eq.${user.id},team_email.cs.{${user.email}}`);
 
       if (projectsError) throw projectsError;
 
@@ -49,7 +49,7 @@ export const PlaygroundProvider = ({ children }) => {
 
       setFolders(foldersObj);
     } catch (error) {
-      console.error('Error fetching folders:', error);
+      console.log('Error fetching folders:', error);
     }
   };
 

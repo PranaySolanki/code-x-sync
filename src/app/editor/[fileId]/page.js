@@ -1,60 +1,63 @@
 'use client';
-import "@/screen/playgroundscreen/index.scss"
+import "@/screen/EditorScreen/index.scss"
 import React, { useState, useEffect } from 'react';
-import EditorContainer from "@/screen/playgroundscreen/EditorContainer.js";
+import EditorContainer from "@/screen/EditorScreen/EditorContainer.js";
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import supabase from "@/helper/supabaseClient";
 
 const PlaygroundScreen = () => {
-    const searchParams = useSearchParams();
-    const fileId = searchParams.get('fileId');
-    const fileLanguage = searchParams.get('language');
-    const fileNameParam = searchParams.get('fileName');
-
-
+    const searchParams = useParams();
+    const FileID = searchParams.fileId;
+    
     const [output, setOutput] = useState('');
     const [input, setInput] = useState('');
     const [theme, setTheme] = useState("vs-light");
     const [code, setCode] = useState('');
-    const [title, setTitle] = useState(fileNameParam || "Untitled");
-    const [language, setLanguage] = useState(fileLanguage || "c");
+    const [title, setTitle] = useState("Untitled");
+    const [language, setLanguage] = useState('c');
 
     useEffect(() => {
-        if (fileId) {
+        if (FileID) {
             loadFileContent();
         }
-    }, [fileId]);
+        
+    }, [FileID]);
 
     const loadFileContent = async () => {
         // Load file content from database
         const { data, error } = await supabase
             .from('File-Table')
-            .select('content')
-            .eq('file_id', fileId)
+            .select('content, file_name, extension')
+            .eq('file_id', FileID)
             .single();
         
         if (data) {
             setCode(data.content);
+            setTitle(data.file_name);
+            setLanguage(data.extension);
+        }
+        else if (error) {
+            console.log('Error loading file content:', error);
         }
     };
 
     const saveCode = async (newCode) => {
-        if (fileId) {
+        if (FileID) {
             const { data, error } = await supabase
                 .from('File-Table')
-                .update({ content: newCode })
-                .eq('file_id', fileId);
+                .update({ content: newCode, updated_at: new Date() })
+                .eq('file_id', FileID);
         }
     };
 
     const saveTitle = async (newTitle) => {
         setTitle(newTitle);
-        if (fileId) {
+        if (FileID) {
             const { data, error } = await supabase
                 .from('File-Table')
-                .update({ file_name: newTitle })
-                .eq('file_id', fileId);
+                .update({ file_name: newTitle ,updated_at: new Date()})
+                .eq('file_id', FileID);
         }
     };
 
@@ -78,6 +81,7 @@ const PlaygroundScreen = () => {
     }
 
     return (
+        
         <div className="playground-container">
             <div className={`header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
                 <Image src="/logo.png" className="logo" alt="logo" width={95} height={95}/>

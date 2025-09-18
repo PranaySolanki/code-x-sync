@@ -59,7 +59,7 @@ const Button = styled.button`
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  background-color: ${props => props.$primary ? '#007bff' : '#6c757d'};
+  background-color: ${props => props.$save ? '#4a67c0ff' : '#6c757d'};
   color: white;
 
   &:hover {
@@ -71,6 +71,45 @@ const Button = styled.button`
   }
 `;
 
+const EmailList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const EmailTag = styled.div`
+  background-color: #e0e0e0;
+  padding: 4px 8px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+`;
+
+const RemoveButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 8px;
+  font-weight: bold;
+  color: #555;
+`;
+
+const InputContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  .addEmailBtn {
+    background-color: #4a67c0ff;
+    margin-left: 8px;
+    }
+    .emailInput {
+      flex: 1;
+    }
+`;
+
+
 const Modal = () => {
   const { isOpenModal, closeModal } = useContext(ModalContext);
   const { fetchFolders } = useContext(PlaygroundContext);
@@ -80,24 +119,35 @@ const Modal = () => {
     language: 'c' 
   });
 
+  const [sharedEmails, setSharedEmails] = useState([]);
+  const [emailInput, setEmailInput] = useState('');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   useEffect(() => {
-    if (isOpenModal.show && isOpenModal.modalType === 4 && isOpenModal.identifiers.fileData) {
-      setFormData({
-        FileTitle: isOpenModal.identifiers.fileData.title || '',
-        language: isOpenModal.identifiers.fileData.language || 'c'
-      });
+    if (isOpenModal.show) {
+      if (isOpenModal.show && isOpenModal.modalType === 4 && isOpenModal.identifiers.fileData) {
+        setFormData({
+          FileTitle: isOpenModal.identifiers.fileData.title,
+          language: isOpenModal.identifiers.fileData.language || 'c'
+        });
+      }
+      else if (isOpenModal.show && isOpenModal.modalType === 3 && isOpenModal.identifiers.folderData) {
+        setFormData({
+          ProjectTitle: isOpenModal.identifiers.folderData.title || '',
+        });
+      }
+      else if (isOpenModal.show && isOpenModal.modalType === 5 && isOpenModal.identifiers.folderData) {
+          setSharedEmails(isOpenModal.identifiers.folderData.TeamEmails || [] );
+        }
     }
-    else if (isOpenModal.show && isOpenModal.modalType === 3 && isOpenModal.identifiers.folderData) {
-      setFormData({
-        ProjectTitle: isOpenModal.identifiers.folderData.title || '',
-      });
-    }
+    
+  
     else {
       // Reset form for other modal types or when closed
       setFormData({
         ProjectTitle: '',
         FileTitle: '',
-        language: 'c'
+        language: 'c',
       });
     }
   }, [isOpenModal]);
@@ -112,9 +162,36 @@ const Modal = () => {
       const originalTitle = isOpenModal.identifiers.folderData.title || '';
       return formData.ProjectTitle !== originalTitle;
     }
+    if (isOpenModal.modalType === 5) {
+      return true;
+    }
+     
     // For other modal types, the form is always "changed" when a new value is entered
     return formData.ProjectTitle.length > 0 || formData.FileTitle.length > 0;
   }, [formData, isOpenModal]);
+
+
+   const handleAddEmail = (e) => {
+    e.preventDefault();
+    if (!emailInput) {
+        alert("Please enter an email address.");
+        return;
+    }
+    if (!emailRegex.test(emailInput)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
+    if (sharedEmails.includes(emailInput)) {
+        alert("This email has already been added.");
+        return;
+    }
+    setSharedEmails([...sharedEmails, emailInput]);
+    setEmailInput('');
+  };
+
+  const handleRemoveEmail = (emailToRemove) => {
+    setSharedEmails(sharedEmails.filter(email => email !== emailToRemove));
+  };
 
 
   const handleSubmit = async (e) => {
@@ -127,6 +204,8 @@ const Modal = () => {
         alert('Authentication required');
         return;
       }
+
+      const originalData = isOpenModal.identifiers.fileData;
 
       if (isOpenModal.modalType === 1) { // New Folder
         const { error } = await supabase
@@ -161,7 +240,9 @@ const Modal = () => {
           .eq('project_id', isOpenModal.identifiers.folderId);
 
         if (error) throw error;
-      } else if (isOpenModal.modalType === 4 && (title!=formData.title || language!= formData.language)) { // Edit File
+      } else if (isOpenModal.modalType === 4) { // Edit File
+
+        if (originalData && (formData.FileTitle !== originalData.title || formData.language !== originalData.language)) {
         const { error } = await supabase
           .from('File-Table')
           .update({ 
@@ -172,6 +253,22 @@ const Modal = () => {
           .eq('file_id', isOpenModal.identifiers.cardId);
 
         if (error) throw error;
+      }
+    }else if (isOpenModal.modalType === 5) { // Share Project
+        const emailsToSave = sharedEmails.length > 0 ? sharedEmails : null;
+        
+        const { error } = await supabase
+          .from('Project-Table')
+          .update({ team_email: emailsToSave })
+          .eq('project_id', isOpenModal.identifiers.folderId);
+
+        if (error) {
+          console.log('Error sharing project:', error);
+          alert('Failed to share project');
+          return;
+        }
+        console.log('Sharing project with:', sharedEmails);
+        // Implement Supabase logic to share the project with the list of emails.
       }
 
       await fetchFolders();
@@ -233,17 +330,36 @@ const Modal = () => {
           )}
 
           {isOpenModal.modalType === 5 && (
-            <Input
-              type="email"
-              placeholder="Enter email to share"
-              required
-            />
-            
+            <>
+              <InputContainer>
+                <Input
+                  type="email"
+                  className='emailInput'
+                  placeholder="Enter email to share"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddEmail(e);
+                    }
+                  }}
+                />
+                <Button type="button" className='addEmailBtn' onClick={handleAddEmail}>Add</Button>
+              </InputContainer>
+              <EmailList>
+                {sharedEmails.map(email => (
+                  <EmailTag key={email}>
+                    {email}
+                    <RemoveButton type="button" onClick={() => handleRemoveEmail(email)}>x</RemoveButton>
+                  </EmailTag>
+                ))}
+              </EmailList>
+            </>
           )}
 
           <ButtonGroup>
             <Button type="button" onClick={closeModal} >Cancel</Button>
-            <Button type="submit" $primary disabled={!isFormChanged}>Save</Button>
+            <Button type="submit" $save disabled={!isFormChanged}>Save</Button>
           </ButtonGroup>
         </ModalForm>
       </ModalContent>

@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase from "@/helper/supabaseClient";
-import { ModalProvider } from '@/screen/homescreen/components/Dialog_box_state';
-import { PlaygroundProvider } from '@/screen/homescreen/components/DataStoreContext';
-import Home from '@/screen/homescreen/Dashboard_Layout';
+import { ModalProvider } from '@/screen/Dashboard/components/Dialog_box_state';
+import { PlaygroundProvider } from '@/screen/Dashboard/components/DataStoreContext';
+import Home from '@/screen/Dashboard/Dashboard_Layout';
 
 const Dashboard = () => {
     const router = useRouter();
