@@ -168,7 +168,7 @@ const RightComponent = () => {
                   identifiers: {
                     folderId: folderId,
                     cardId: "",
-                    folderData: { ProjectTitle: folder.title }
+                    folderData: { title: folder.title }
                   }
                 })} >edit</ Icon>
 
@@ -177,7 +177,7 @@ const RightComponent = () => {
                   modalType: 5,
                   identifiers: { folderId: folderId, 
                     cardId: "", 
-                    folderData: { TeamEmails : folder.sharedWith || [] }
+                    folderData: { TeamEmails : folder.sharedWith }
                   }
                 })} >groups</Icon>
                 

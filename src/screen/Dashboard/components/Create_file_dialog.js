@@ -124,30 +124,30 @@ const Modal = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   useEffect(() => {
-    if (isOpenModal.show && isOpenModal.modalType === 4 && isOpenModal.identifiers.fileData) {
-      setFormData({
-        FileTitle: isOpenModal.identifiers.fileData.title || '',
-        language: isOpenModal.identifiers.fileData.language || 'c'
-      });
-    }
-    else if (isOpenModal.show && isOpenModal.modalType === 3 && isOpenModal.identifiers.folderData) {
-      setFormData({
-        ProjectTitle: isOpenModal.identifiers.folderData.title || '',
-      });
-    }if (isOpenModal.show && isOpenModal.modalType === 5 && isOpenModal.identifiers.folderData) {
-      if(!isOpenModal.identifiers.folderData.TeamEmails) {
-        setSharedEmails([]);
-      }else{
-        setSharedEmails(isOpenModal.identifiers.folderData.TeamEmails);
+    if (isOpenModal.show) {
+      if (isOpenModal.show && isOpenModal.modalType === 4 && isOpenModal.identifiers.fileData) {
+        setFormData({
+          FileTitle: isOpenModal.identifiers.fileData.title,
+          language: isOpenModal.identifiers.fileData.language || 'c'
+        });
       }
+      else if (isOpenModal.show && isOpenModal.modalType === 3 && isOpenModal.identifiers.folderData) {
+        setFormData({
+          ProjectTitle: isOpenModal.identifiers.folderData.title || '',
+        });
+      }
+      else if (isOpenModal.show && isOpenModal.modalType === 5 && isOpenModal.identifiers.folderData) {
+          setSharedEmails(isOpenModal.identifiers.folderData.TeamEmails || [] );
+        }
     }
+    
+  
     else {
       // Reset form for other modal types or when closed
       setFormData({
         ProjectTitle: '',
         FileTitle: '',
         language: 'c',
-        sharedEmails: []
       });
     }
   }, [isOpenModal]);
@@ -205,6 +205,8 @@ const Modal = () => {
         return;
       }
 
+      const originalData = isOpenModal.identifiers.fileData;
+
       if (isOpenModal.modalType === 1) { // New Folder
         const { error } = await supabase
           .from('Project-Table')
@@ -238,7 +240,9 @@ const Modal = () => {
           .eq('project_id', isOpenModal.identifiers.folderId);
 
         if (error) throw error;
-      } else if (isOpenModal.modalType === 4 && (title!=formData.title || language!= formData.language)) { // Edit File
+      } else if (isOpenModal.modalType === 4) { // Edit File
+
+        if (originalData && (formData.FileTitle !== originalData.title || formData.language !== originalData.language)) {
         const { error } = await supabase
           .from('File-Table')
           .update({ 
@@ -249,7 +253,8 @@ const Modal = () => {
           .eq('file_id', isOpenModal.identifiers.cardId);
 
         if (error) throw error;
-      }else if (isOpenModal.modalType === 5) { // Share Project
+      }
+    }else if (isOpenModal.modalType === 5) { // Share Project
         const emailsToSave = sharedEmails.length > 0 ? sharedEmails : null;
         
         const { error } = await supabase
