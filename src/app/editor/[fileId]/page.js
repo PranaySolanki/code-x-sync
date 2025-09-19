@@ -21,7 +21,6 @@ const PlaygroundScreen = () => {
         if (FileID) {
             loadFileContent();
         }
-        
     }, [FileID]);
 
     const loadFileContent = async () => {

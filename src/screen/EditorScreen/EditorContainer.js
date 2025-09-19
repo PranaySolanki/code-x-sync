@@ -4,6 +4,13 @@ import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
 import { Tooltip } from "@mui/material";
+import {  
+   joinProject, 
+//     emitCursorMove, 
+//     listenForCodeUpdates, 
+//     listenForCursorUpdates,
+//     emitCodeChange
+ } from '@/screen/EditorScreen/socket.js';
 
 const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange,code_language }) => {
 
@@ -13,16 +20,56 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     const [titleInput, setTitleInput] = useState(fileName);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    const [otherCursors, setOtherCursors] = useState({});
+    const isUpdatingExternally = useRef(false);
     const codeRef = useRef();
 
-    useEffect(() => {
-        setTitleInput(fileName || "Untitled");
-        setLanguage(code_language);
+ useEffect(() => {
+    setTitleInput(fileName || "Untitled");
+    setLanguage(code_language);
     }, [fileName], [code_language]);
 
-    const onChangeCode = (newCode) => {
-        codeRef.current = newCode;
-    }
+
+//     // Get the project ID from the URL. This is necessary for Socket.io rooms.
+//     const FileID = window.location.pathname.split('/').pop();
+
+//     if (FileID) {
+//         // Join the Socket.io room for this specific file
+//         joinProject(FileID);
+
+//         // Listen for code updates from other users
+//         listenForCodeUpdates((data) => {
+//             // Prevent an infinite loop by checking if the update is from another user
+//             if (data.userId !== 'your_current_user_id') { // Replace with your actual user ID logic
+//                 isUpdatingExternally.current = true;
+//                 setCode(data.change);
+//             }
+//         });
+
+//         // Listen for cursor updates from other users
+//         listenForCursorUpdates((data) => {
+//             setOtherCursors(prev => ({
+//                 ...prev,
+//                 [data.userId]: data.position
+//             }));
+//         });
+//     }
+// }, []);
+
+   const onChangeCode = (newCode) => {
+    codeRef.current = newCode;
+}
+
+//     const onChangeCode = (newCode) => {
+//          if (!isUpdatingExternally.current) {
+//         setCode(newCode); // Update local state
+//         // Emit the change to the server for real-time synchronization
+//         const FileID = window.location.pathname.split('/').pop();
+//         emitCodeChange(FileID, newCode);
+//     }
+//     isUpdatingExternally.current = false;
+//     codeRef.current = newCode;
+//     }
 
     const fileExtensionMapping = {
         c: 'c',
@@ -109,10 +156,19 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
         } finally {
             setIsProcessing(false); 
         }
-  };
+     };
+    //  const handleMouseMove = (e) => {
+    //     const position = {
+    //     x: e.clientX,
+    //     y: e.clientY,
+    //     };
+    //      const FileID = window.location.pathname.split('/').pop();
+    //      emitCursorMove(FileID, position);
+    //      };
 
 
     return(
+        //add onMouseMove={handleMouseMove}
         <div className="root-editor-container" >
             <div className={`editor-header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
                 <div className="editor-left-container">
