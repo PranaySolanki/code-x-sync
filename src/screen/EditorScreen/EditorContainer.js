@@ -5,7 +5,7 @@ import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
 import { Tooltip } from "@mui/material";
 
-const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange,code_language }) => {
+const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner }) => {
 
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState(code_language);
@@ -144,9 +144,11 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                             autoFocus
                         />
                     ) : (
-                        <b className="title" onClick={() => setIsEditingTitle(true)}>{fileName || "Untitled"}</b>
+                        <b className="title" onClick={() => isOwner && setIsEditingTitle(true)}>{fileName || "Untitled"}</b>
                     )}
-                    <span className="material-icons" onClick={() => setIsEditingTitle(true)}>edit</span>
+                    {isOwner && (
+                        <span className="material-icons" onClick={() => setIsEditingTitle(true)}>edit</span>
+                    )}
                     <button className="saveBtn" disabled={isProcessing} onClick={() => onTitleChange(titleInput)}>Save Code</button>
                 </div>
 

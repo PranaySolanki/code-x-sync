@@ -36,6 +36,7 @@ export const PlaygroundProvider = ({ children }) => {
 
         foldersObj[project.project_id] = {
           title: project.project_name,
+          owner_id: project.owner_id,
           sharedWith: project.team_email,
           playgrounds: files.reduce((acc, file) => {
             acc[file.file_id] = {

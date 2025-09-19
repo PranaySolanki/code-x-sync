@@ -48,9 +48,22 @@
     .input-output-container {
         //background-color: white;
         display: flex;
+        flex: 1 1 0;
         flex-direction: column;
         font-size: large;
         height: 100%;
+
+        textarea {
+            border: none;
+            resize: none;
+            padding: 10px;
+            font-size: 18px; 
+            border-radius: 10px;
+            margin: 5px;   
+        }
+        textarea:focus {
+             outline: none;
+          }
 
         .input-header,
         .output-header {
@@ -64,36 +77,31 @@
             }
            
         }
-
-
-        textarea {
-            flex-grow: 1;
-            border: none;
-            resize: none;
-            padding: 10px;
-            font-size: 18px; 
-            border-radius: 10px;
-            margin: 5px;           
-        }
-        .input-textarea{
+     
+    }
+    .input-section{
+          flex: 0 0 auto;
+          height: auto;
+          .input-textarea{
           border-radius: 10px;
           height: 100px;
           margin: 5px;
         }
-        .error-text, .output-textarea{
+        }
+
+
+        .output-section{
+          flex: 1 1 0;
+
+          .error-text, .output-textarea{
+          flex: 1 1 0;
           margin-bottom: 9px ;
 
+          }
+          .exportBtn{
+            cursor: pointer;
+          }
         }
-
-        textarea:focus {
-            outline: none;
-        }
-        .exportBtn{
-          cursor: pointer;
-        }
-        
-        
-    }
     
      
      .light-theme {

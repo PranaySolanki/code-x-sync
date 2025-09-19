@@ -23,7 +23,12 @@ const StyledLeftComponent = styled.div`
 `;
 
 const ContentContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
+    height: 100%;
 `;
 
 const Logo = styled(Image)`
@@ -78,7 +83,7 @@ const LeftComponent = () => {
         <StyledLeftComponent>
             <ContentContainer>
                 <Logo src={logo} alt="logo" width={165} height={165} />
-                <MainHeading> <span>Code</span> Deck</MainHeading>
+                <MainHeading> <span>Code</span> Dashboard</MainHeading>
                 <SubHeading>Code. Compile. Debug.</SubHeading>
                 <AddNewButton onClick={() => openModal({
                     show: true,
