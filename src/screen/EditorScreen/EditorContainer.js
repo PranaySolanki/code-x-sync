@@ -6,13 +6,14 @@ import  executeCode  from "./CompilerAPI";
 import { Tooltip } from "@mui/material";
 import {  
    joinProject, 
-//     emitCursorMove, 
-//     listenForCodeUpdates, 
-//     listenForCursorUpdates,
-//     emitCodeChange
+    emitCursorMove, 
+    listenForCodeUpdates, 
+    listenForInitialCode,
+    listenForCursorUpdates,
+    emitCodeChange
  } from '@/screen/EditorScreen/socket.js';
 
-const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange,code_language }) => {
+const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange,code_language,fileId }) => {
 
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState(code_language);
@@ -21,6 +22,8 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     const [isProcessing, setIsProcessing] = useState(false);
 
     const [otherCursors, setOtherCursors] = useState({});
+    const editorRef = useRef(null); // Ref for Monaco editor instance
+    const disposables = useRef([]); // To clean up listeners
     const isUpdatingExternally = useRef(false);
     const codeRef = useRef();
 
@@ -29,47 +32,102 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     setLanguage(code_language);
     }, [fileName], [code_language]);
 
+    useEffect(() => {
+        if(!fileId) return;
+        // Join the Socket.io room for this specific file
+        joinProject(fileId);
+        console.log("Joined project room: ", fileId);
 
-//     // Get the project ID from the URL. This is necessary for Socket.io rooms.
-//     const FileID = window.location.pathname.split('/').pop();
+        // Listen for the initial code from the server
+        listenForInitialCode((initialCode) => {
+            setCode(initialCode);
+            codeRef.current = initialCode;
+        });
 
-//     if (FileID) {
-//         // Join the Socket.io room for this specific file
-//         joinProject(FileID);
+        // Listen for real-time code updates 
+        listenForCodeUpdates((data) => {
+            // Check if the update is from another user
+            isUpdatingExternally.current = true;
+            setCode(data.code);
+            codeRef.current = data.code;
 
-//         // Listen for code updates from other users
-//         listenForCodeUpdates((data) => {
-//             // Prevent an infinite loop by checking if the update is from another user
-//             if (data.userId !== 'your_current_user_id') { // Replace with your actual user ID logic
-//                 isUpdatingExternally.current = true;
-//                 setCode(data.change);
-//             }
-//         });
+            // Use a short delay to prevent the local change from re-triggering a broadcast
+            setTimeout(() => {
+                isUpdatingExternally.current = false;
+            }, 50);
+        });
 
-//         // Listen for cursor updates from other users
-//         listenForCursorUpdates((data) => {
-//             setOtherCursors(prev => ({
-//                 ...prev,
-//                 [data.userId]: data.position
-//             }));
-//         });
-//     }
-// }, []);
+        const cursorListener = listenForCursorUpdates((data) => {
+            setOtherCursors(prev => ({
+                ...prev,
+                [data.userId]: data.position
+            }));
+        });
+    return () => {
+            // cursorListener(); // Assuming your socket.js returns a cleanup function
+            disposables.current.forEach(d => d.dispose());
+        };
+    }, [fileId]);
+    
+    useEffect(() => {
+    if (!fileId) return;
 
-   const onChangeCode = (newCode) => {
+    listenForCursorUpdates((data) => {
+        console.log("Received cursor update from:", data.userId, "at:", data.position);
+      setOtherCursors(prev => ({
+        ...prev,
+        [data.userId]: data.position
+      }));
+    });
+
+    const cleanupCodeUpdates = listenForCodeUpdates((data) => {
+            // ...
+        });
+        const cleanupCursorUpdates = listenForCursorUpdates((data) => {
+            // ...
+        });
+
+        return () => {
+            cleanupCodeUpdates();
+            cleanupCursorUpdates();
+        };
+  }, [fileId]);
+
+   const handleCursorMove = (e) => {
+    // This event handler will get the cursor position
+    const editor = editorRef.current;
+    if (editor && fileId) {
+      const position = editor.getPosition();
+      emitCursorMove(fileId, position);
+    }
+  };
+
+  const handleEditorMount = (editor) => {
+    editorRef.current = editor;
+
+    // Emit cursor position whenever it changes
+    const cursorDisposable = editor.onDidChangeCursorPosition((e) => {
+        emitCursorMove(fileId, e.position);
+    });
+    
+    disposables.current.push(cursorDisposable);
+};
+
+// Real time update code function
+const onChangeCode = (newCode) => {
+    // Update the local state
+    setCode(newCode); 
+    
+    // Update the code ref for other functions (like RunCode)
     codeRef.current = newCode;
-}
+    
+    // Check if the update is not from an external source
+    if (!isUpdatingExternally.current && fileId) {
+        // Emit the change to the server
+        emitCodeChange(fileId, newCode);
+    }
+};
 
-//     const onChangeCode = (newCode) => {
-//          if (!isUpdatingExternally.current) {
-//         setCode(newCode); // Update local state
-//         // Emit the change to the server for real-time synchronization
-//         const FileID = window.location.pathname.split('/').pop();
-//         emitCodeChange(FileID, newCode);
-//     }
-//     isUpdatingExternally.current = false;
-//     codeRef.current = newCode;
-//     }
 
     const fileExtensionMapping = {
         c: 'c',
@@ -157,14 +215,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             setIsProcessing(false); 
         }
      };
-    //  const handleMouseMove = (e) => {
-    //     const position = {
-    //     x: e.clientX,
-    //     y: e.clientY,
-    //     };
-    //      const FileID = window.location.pathname.split('/').pop();
-    //      emitCursorMove(FileID, position);
-    //      };
+   
 
 
     return(
@@ -226,7 +277,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 </Tooltip>
 
 
-                    <select onChange={onChangeLanguage} value={language} disabled={isProcessing}>
+                    <select onChange={onChangeLanguage} value={language} disabled={isProcessing} id="language-select" className="language-select">
                         <option value="c">C</option>
                         <option value="java">Java</option>
                         <option value="javascript">Javascript</option>
@@ -263,24 +314,15 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                         scrollBeyondLastLine: false,
                         readOnly: isProcessing 
                     }}
-                    onChange={onChangeCode}
+                    onChange={(value, event) => {
+                        onChangeCode(value);
+                        handleCursorMove(event);
+                    }}
                     value={code}
+                    onMount={handleEditorMount}
                 />
             </div>
             <div className={`editor-footer ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
-                {/* <button className="btn" onClick={fullscreen} disabled={isProcessing} >
-                    <span className="material-icons">fullscreen</span>
-                    <span>Full Screen</span>
-                </button>
-                <label htmlFor="import-code" className="btn" disabled={isProcessing} >
-                    <span className="material-icons">cloud_download</span>
-                    <span>Import Code</span>
-                </label>
-                <input type="file" id="import-code" style={{display: "none"}} onChange={ImportCode} disabled={isProcessing}/>
-                <button className="btn" onClick={exportCode} disabled={isProcessing} >
-                    <span className="material-icons" >cloud_upload</span>
-                    <span>Export Code</span>
-                </button> */}
                 <button className="Runbtn" onClick={RunCode} disabled={isProcessing} >
                     <span className="material-icons runArrow">play_arrow</span>
                     <span>{isProcessing ? "Running..." : "Run Code"}</span>

@@ -17,6 +17,10 @@ const PlaygroundScreen = () => {
     const [title, setTitle] = useState("Untitled");
     const [language, setLanguage] = useState('c');
 
+    const onChangeCode = (newCode) => {
+    setCode(newCode);
+  };
+
     useEffect(() => {
         if (FileID) {
             loadFileContent();
@@ -83,7 +87,7 @@ const PlaygroundScreen = () => {
         
         <div className="playground-container">
             <div className={`header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
-                <Image src="/logo.png" className="logo" alt="logo" width={95} height={95}/>
+                <Image src="/logo.png" className="logo" alt="logo" width={95} height={95} priority/>
                 <span className="beside-logo">CodeXSync</span>
             </div>
 
@@ -98,13 +102,16 @@ const PlaygroundScreen = () => {
                     onCodeChange={saveCode}
                     fileName={title}
                     onTitleChange={saveTitle}
+                    fileId={FileID}
+                    onChange={onChangeCode}
+                    value={code}
                 />
                 <div className="right-playground-container">
                     <div className="input-output-container ">
                         <div className="input-header">
                             <b>Input:</b>
                         </div>
-                        <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Enter Input here" className="input-textarea"></textarea>
+                        <textarea id="input-textare" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Enter Input here" className="input-textarea"></textarea>
                         <div className="input-bottom-text">If your code takes input, add it in the above box before running.</div>
                     </div>
                 
@@ -113,12 +120,13 @@ const PlaygroundScreen = () => {
                             <div className="output-text">
                                 <b>Output:</b>
                             </div>
-                            <label htmlFor="output-file-export" className="icon-container exportBtn" onClick={ExportOutput}>
+                            <label htmlFor="output-textarea" className="icon-container exportBtn" onClick={ExportOutput}>
                             <span className="material-symbols-outlined">ios_share</span>
                             <b>Export Output</b>
                             </label>
                         </div>
                         <textarea  
+                            id="output-textarea"
                             className={output.isError ? "error-text" : "output-textarea"} 
                             value={output.text} 
                             readOnly>
