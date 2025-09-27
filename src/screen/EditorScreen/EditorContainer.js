@@ -16,6 +16,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
 
     const isUpdatingExternally = useRef(false);
     const channelRef = useRef(null); 
+    const editorRef = useRef(null);
 
     const codeRef = useRef();
 
@@ -25,68 +26,84 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     }, [fileName], [code_language]);
 
     useEffect(() => {
-    if (!fileID) return;
-
-    // Define a unique channel name using the fileID (e.g., 'project:fileID')
-    const channelName = `file_sync:${fileID}`;
-    
-    // Create the channel using Supabase client
-    const channel = supabase.channel(channelName);
-    channelRef.current = channel;
-
-    channel.on(
-        'broadcast',
-        { event: 'code-change' },
-        (payload) => {
-            // Receive code change from another user
-            const newCode = payload.payload.code;
-            
-            isUpdatingExternally.current = true;
-            setCode(newCode);
-            codeRef.current = newCode;
-            
-            // Allow local changes to resume after the update
-            setTimeout(() => {
-                isUpdatingExternally.current = false;
-            }, 50);
-        }
-    );
-    
-    channel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-            // OPTIONAL: Request initial state when subscribing (if needed)
-            // console.log(`Subscribed to Supabase channel: ${channelName}`);
-        }
-    });
-
-    return () => {
-        // Unsubscribe and remove the channel when leaving the editor
-        if (channelRef.current) {
-            channelRef.current.unsubscribe();
-            supabase.removeChannel(channelRef.current);
-            channelRef.current = null;
-        }
-    };
-
-}, [fileID]);
-
-    const onChangeCode = (newCode) => {
-        setCode(newCode);
-        codeRef.current = newCode;
-
-         if (!isUpdatingExternally.current && channelRef.current) {
-        // Broadcast the change to the Supabase channel
-        channelRef.current.send({
-            type: 'broadcast',
-            event: 'code-change',
-            payload: { 
-                code: newCode,
-                // OPTIONAL: Send user ID for cursor tracking later
-                // userId: /* Your current user's ID */ 
+        if (!fileID) return;
+        // Define a unique channel name using the fileID (e.g., 'project:fileID')
+        const channelName = `file_sync:${fileID}`;
+        // Create the channel using Supabase client
+        const channel = supabase.channel(channelName, {
+            // You can leave the config object empty {} if you only want the broadcast extension.
+            config: {
             }
         });
-        }
-    }
+        channelRef.current = channel;
+        channel.on(
+            'broadcast',
+            { event: 'code-change' },
+            (payload) => {
+                // Receive code change from another user
+                isUpdatingExternally.current = true;
+            const editor = editorRef.current;
+            
+            if (editor) {
+                // APPLY THE CHANGE DIRECTLY TO THE MODEL
+                editor.getModel().applyEdits(payload.payload.changes);
+                
+                // OPTIONAL: Update local state to ensure React is aware of the change
+                setCode(editor.getValue()); 
+            }
+
+            setTimeout(() => { isUpdatingExternally.current = false; }, 50);
+            }
+        );
+        channel.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                // OPTIONAL: Request initial state when subscribing (if needed)
+                // console.log(`Subscribed to Supabase channel: ${channelName}`);
+            }
+        });
+        return () => {
+            // Unsubscribe and remove the channel when leaving the editor
+            if (channelRef.current) {
+                channelRef.current.unsubscribe();
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
+        };
+    }, [fileID]);
+
+    const handleEditorChanges = (editor) => {
+        editorRef.current = editor;
+
+        // Use onDidChangeModelContent to get the list of changes (the "patches")
+        editor.onDidChangeModelContent((event) => {
+            // If the change came from an external source, do nothing and return.
+            if (isUpdatingExternally.current) return;
+            
+            // This is a local change. Get the full code for consistency, 
+            // but for a better system, you would send event.changes.
+            const newCode = editor.getValue(); 
+            codeRef.current = newCode;
+
+            // Broadcast the change event object itself for other clients to apply
+            if (channelRef.current) {
+                channelRef.current.send({
+                    type: 'broadcast',
+                    event: 'code-change',
+                    payload: { 
+                        changes: event.changes, // Send the specific changes
+                        code: newCode, // Send the full code as a fallback/check
+                        userId: 'user-' + Math.random().toString(36).substring(2, 7)
+                    }
+                });
+            }
+            
+            // Update local state AFTER broadcasting (or before, consistency depends on your choice)
+            // NOTE: Setting state here is fine for simple display, but the editor already has the new value.
+            setCode(newCode); 
+        });
+    // ... setup for cursor changes (onDidChangeCursorPosition) ...
+    };
+
 
     const fileExtensionMapping = {
         c: 'c',
@@ -273,24 +290,11 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                         scrollBeyondLastLine: false,
                         readOnly: isProcessing 
                     }}
-                    onChange={onChangeCode}
+                    onMount={handleEditorChanges}
                     value={code}
                 />
             </div>
             <div className={`editor-footer ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
-                {/* <button className="btn" onClick={fullscreen} disabled={isProcessing} >
-                    <span className="material-icons">fullscreen</span>
-                    <span>Full Screen</span>
-                </button>
-                <label htmlFor="import-code" className="btn" disabled={isProcessing} >
-                    <span className="material-icons">cloud_download</span>
-                    <span>Import Code</span>
-                </label>
-                <input type="file" id="import-code" style={{display: "none"}} onChange={ImportCode} disabled={isProcessing}/>
-                <button className="btn" onClick={exportCode} disabled={isProcessing} >
-                    <span className="material-icons" >cloud_upload</span>
-                    <span>Export Code</span>
-                </button> */}
                 <button className="Runbtn" onClick={RunCode} disabled={isProcessing} >
                     <span className="material-icons runArrow">play_arrow</span>
                     <span>{isProcessing ? "Running..." : "Run Code"}</span>
