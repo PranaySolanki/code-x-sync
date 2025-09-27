@@ -1,7 +1,9 @@
 import  {io}  from 'socket.io-client';
 
 // Establish a single connection to your backend server.
-const socket = io('http://localhost:4000');
+
+// const socket = io('http://localhost:4000');
+const socket = io('https://server-7bro.onrender.com');
 //add export 
 
 //  A helper function to join the specific project room.
