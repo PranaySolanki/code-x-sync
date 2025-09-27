@@ -267,7 +267,6 @@ const Modal = () => {
           alert('Failed to share project');
           return;
         }
-        console.log('Sharing project with:', sharedEmails);
         // Implement Supabase logic to share the project with the list of emails.
       }
 

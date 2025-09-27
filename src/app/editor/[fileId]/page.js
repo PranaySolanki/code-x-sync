@@ -160,6 +160,7 @@ const PlaygroundScreen = () => {
                     fileName={title}
                     onTitleChange={saveTitle}
                     isOwner={isOwner}
+                    fileID={FileID}
                 />
                 <div className="right-playground-container">
                     <div className="input-output-container input-section">

@@ -4,14 +4,18 @@ import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
 import { Tooltip } from "@mui/material";
+import supabase from '@/helper/supabaseClient'; 
 
-const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner }) => {
+const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner,fileID }) => {
 
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState(code_language);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [titleInput, setTitleInput] = useState(fileName);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const isUpdatingExternally = useRef(false);
+    const channelRef = useRef(null); 
 
     const codeRef = useRef();
 
@@ -20,8 +24,68 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
         setLanguage(code_language);
     }, [fileName], [code_language]);
 
+    useEffect(() => {
+    if (!fileID) return;
+
+    // Define a unique channel name using the fileID (e.g., 'project:fileID')
+    const channelName = `file_sync:${fileID}`;
+    
+    // Create the channel using Supabase client
+    const channel = supabase.channel(channelName);
+    channelRef.current = channel;
+
+    channel.on(
+        'broadcast',
+        { event: 'code-change' },
+        (payload) => {
+            // Receive code change from another user
+            const newCode = payload.payload.code;
+            
+            isUpdatingExternally.current = true;
+            setCode(newCode);
+            codeRef.current = newCode;
+            
+            // Allow local changes to resume after the update
+            setTimeout(() => {
+                isUpdatingExternally.current = false;
+            }, 50);
+        }
+    );
+    
+    channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+            // OPTIONAL: Request initial state when subscribing (if needed)
+            // console.log(`Subscribed to Supabase channel: ${channelName}`);
+        }
+    });
+
+    return () => {
+        // Unsubscribe and remove the channel when leaving the editor
+        if (channelRef.current) {
+            channelRef.current.unsubscribe();
+            supabase.removeChannel(channelRef.current);
+            channelRef.current = null;
+        }
+    };
+
+}, [fileID]);
+
     const onChangeCode = (newCode) => {
+        setCode(newCode);
         codeRef.current = newCode;
+
+         if (!isUpdatingExternally.current && channelRef.current) {
+        // Broadcast the change to the Supabase channel
+        channelRef.current.send({
+            type: 'broadcast',
+            event: 'code-change',
+            payload: { 
+                code: newCode,
+                // OPTIONAL: Send user ID for cursor tracking later
+                // userId: /* Your current user's ID */ 
+            }
+        });
+        }
     }
 
     const fileExtensionMapping = {
