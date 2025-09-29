@@ -75,7 +75,7 @@ export const PlaygroundProvider = ({ children }) => {
 
         await fetchFolders();
       } catch (error) {
-        console.error('Error deleting folder:', error);
+        console.log('Error deleting folder:', error);
         alert('Failed to delete folder');
       }
     }
@@ -93,7 +93,7 @@ export const PlaygroundProvider = ({ children }) => {
 
         await fetchFolders();
       } catch (error) {
-        console.error('Error deleting file:', error);
+        console.log('Error deleting file:', error);
         alert('Failed to delete file');
       }
     }

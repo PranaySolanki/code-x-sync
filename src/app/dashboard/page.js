@@ -23,7 +23,7 @@ const Dashboard = () => {
 
                 setUser(session.user);
             } catch (error) {
-                console.error('Auth check error:', error);
+                console.log('Auth check error:', error);
                 router.replace('/login');
             } finally {
                 setIsLoading(false);

@@ -4,8 +4,9 @@ import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
 import { Tooltip } from "@mui/material";
+import supabase from '@/helper/supabaseClient'; 
 
-const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner }) => {
+const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner,fileID }) => {
 
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState(code_language);
@@ -13,16 +14,137 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     const [titleInput, setTitleInput] = useState(fileName);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    const isUpdatingExternally = useRef(false);
+    const channelRef = useRef(null); 
+    const editorRef = useRef(null);
+
     const codeRef = useRef();
+
+    const localClientIdRef = useRef('client-' + Math.random().toString(36).substring(2, 9));
+
 
     useEffect(() => {
         setTitleInput(fileName || "Untitled");
         setLanguage(code_language);
     }, [fileName], [code_language]);
 
-    const onChangeCode = (newCode) => {
-        codeRef.current = newCode;
-    }
+    useEffect(() => {
+        if (!fileID) return;
+        // Define a unique channel name using the fileID (e.g., 'project:fileID')
+        const channelName = `file_sync:${fileID}`;
+        // Create the channel using Supabase client
+        const channel = supabase.channel(channelName);
+        channelRef.current = channel;
+        channel.on(
+            'broadcast',
+            { event: 'code-change' },
+            (payload) => {
+                // Receive code change from another user
+                isUpdatingExternally.current = true;
+                const editor = editorRef.current;
+                
+                if (editor) {
+                    // APPLY THE CHANGE DIRECTLY TO THE MODEL
+                    editor.getModel().applyEdits(payload.payload.changes,[]);
+                    }
+
+                isUpdatingExternally.current = false;
+                }
+        );
+        channel.on(
+            'broadcast',
+            { event: 'request-initial-code' },
+            (payload) => {
+                // A user has requested the current state.
+                const currentCode = editorRef.current?.getValue() || codeRef.current;
+                
+                if (currentCode) {
+                    // 💡 NEW STEP: Send the current code back to the entire channel
+                    channel.send({
+                        type: 'broadcast',
+                        event: 'initial-code-response',
+                        payload: { 
+                            code: currentCode,
+                            userId: localClientIdRef.current // Identify the sender
+                         }
+                    });
+                }
+            }
+        )
+         channel.on(
+            'broadcast',
+            { event: 'initial-code-response' },
+            (payload) => {
+
+                 if (payload.payload.senderId === localClientIdRef.current) {
+            return; // EXIT: Do not process this message
+        }
+                
+                const initialCode = payload.payload.code;
+                
+                // Only update if the current local code is empty (or the default initial load)
+                if (editorRef.current && editorRef.current.getValue() === '') {
+                    isUpdatingExternally.current = true;
+                    editorRef.current.setValue(initialCode);
+                    setCode(initialCode);
+                    codeRef.current = initialCode;
+                    isUpdatingExternally.current = false;
+                }
+            }
+            
+        );
+        channel.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                //  After subscribing, request the current state
+                channel.send({
+                    type: 'broadcast',
+                    event: 'request-initial-code',
+                    // Use the client's own random ID so the sender knows where to reply
+                    payload: { userId: localClientIdRef.current } 
+                });
+            }
+            
+        });
+        return () => {
+            // Unsubscribe and remove the channel when leaving the editor
+            if (channelRef.current) {
+                channelRef.current.unsubscribe();
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
+        };
+    }, [fileID]);
+
+    const handleEditorChanges = (editor) => {
+        editorRef.current = editor;
+
+            // Use onDidChangeModelContent to get the list of changes (the "patches")
+            editor.onDidChangeModelContent((event) => {
+            // If the change came from an external source, do nothing and return.
+            if (isUpdatingExternally.current) return;
+            
+            // This is a local change. Get the full code for consistency, 
+            // but for a better system, you would send event.changes.
+            const newCode = editor.getValue(); 
+            codeRef.current = newCode;
+
+            // Broadcast the change event object itself for other clients to apply
+            if (channelRef.current) {
+                channelRef.current.send({
+                    type: 'broadcast',
+                    event: 'code-change',
+                    payload: { 
+                        changes: event.changes, // Send the specific changes
+                        code: newCode, // Send the full code as a fallback/check
+                        userId: localClientIdRef.current // Identify the sender
+                    }
+                });
+            }
+            
+        });
+    // ... setup for cursor changes (onDidChangeCursorPosition) ...
+    };
+
 
     const fileExtensionMapping = {
         c: 'c',
@@ -47,7 +169,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             const link = document.createElement("a");
             link.href = downloadURL;
 
-            link.download = `code.${fileExtensionMapping[language]}`
+            link.download = `${fileName}.${fileExtensionMapping[language]}`
             link.click();
         }
         
@@ -172,7 +294,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 </Tooltip>
 
 
-                    <select onChange={onChangeLanguage} value={language} disabled={isProcessing}>
+                    <select onChange={onChangeLanguage} value={language} id="s" disabled={isProcessing}>
                         <option value="c">C</option>
                         <option value="java">Java</option>
                         <option value="javascript">Javascript</option>
@@ -200,6 +322,10 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     language={language}
                     theme={theme}
                     options={{
+                        wordWrap: "on",
+                        fontSize: 17,
+                        cursorSmoothCaretAnimation: "on",
+                        cursorBlinking: "expand",
                         minimap:{
                             enabled: false
                         },
@@ -209,24 +335,11 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                         scrollBeyondLastLine: false,
                         readOnly: isProcessing 
                     }}
-                    onChange={onChangeCode}
+                    onMount={handleEditorChanges}
                     value={code}
                 />
             </div>
             <div className={`editor-footer ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
-                {/* <button className="btn" onClick={fullscreen} disabled={isProcessing} >
-                    <span className="material-icons">fullscreen</span>
-                    <span>Full Screen</span>
-                </button>
-                <label htmlFor="import-code" className="btn" disabled={isProcessing} >
-                    <span className="material-icons">cloud_download</span>
-                    <span>Import Code</span>
-                </label>
-                <input type="file" id="import-code" style={{display: "none"}} onChange={ImportCode} disabled={isProcessing}/>
-                <button className="btn" onClick={exportCode} disabled={isProcessing} >
-                    <span className="material-icons" >cloud_upload</span>
-                    <span>Export Code</span>
-                </button> */}
                 <button className="Runbtn" onClick={RunCode} disabled={isProcessing} >
                     <span className="material-icons runArrow">play_arrow</span>
                     <span>{isProcessing ? "Running..." : "Run Code"}</span>

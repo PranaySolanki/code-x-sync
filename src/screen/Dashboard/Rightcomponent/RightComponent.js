@@ -174,7 +174,6 @@ const RightComponent = () => {
   // Function to check if the current user is the owner of the project  
 
   const check_isOwner = (ownerID) => {
-  console.log('currentUserId:', currentUserId, 'ownerID:', ownerID);
   return currentUserId && String(currentUserId) === String(ownerID);
 }
 
