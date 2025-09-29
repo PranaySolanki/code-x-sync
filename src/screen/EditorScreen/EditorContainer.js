@@ -13,7 +13,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [titleInput, setTitleInput] = useState(fileName);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [initialCodeLoaded, setInitialCodeLoaded] = useState('');
 
     const isUpdatingExternally = useRef(false);
     const channelRef = useRef(null); 
@@ -91,11 +90,14 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 
                 // Only update if the current local code is empty (or the default initial load)
                 if (editorRef.current && editorRef.current.getValue() === '') {
+                    isUpdatingExternally.current = true;
                     editorRef.current.setValue(initialCode);
                     setCode(initialCode);
                     codeRef.current = initialCode;
+                    setTimeout(() => { isUpdatingExternally.current = false; }, 50);
                 }
             }
+            
         );
         channel.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
