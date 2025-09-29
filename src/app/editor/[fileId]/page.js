@@ -18,6 +18,7 @@ const PlaygroundScreen = () => {
     const [language, setLanguage] = useState('c');
     const [authorized, setAuthorized] = useState(null); // null = loading, true = allowed, false = not allowed
     const [isOwner, setIsOwner] = useState(false);
+    
 
     useEffect(() => {
         if (FileID) {

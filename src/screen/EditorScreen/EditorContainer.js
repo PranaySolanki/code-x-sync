@@ -13,12 +13,15 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [titleInput, setTitleInput] = useState(fileName);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [initialCodeLoaded, setInitialCodeLoaded] = useState('');
 
     const isUpdatingExternally = useRef(false);
     const channelRef = useRef(null); 
     const editorRef = useRef(null);
 
     const codeRef = useRef();
+
+    const localClientIdRef = useRef('client-' + Math.random().toString(36).substring(2, 9));
 
     useEffect(() => {
         setTitleInput(fileName || "Untitled");
@@ -42,24 +45,69 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             (payload) => {
                 // Receive code change from another user
                 isUpdatingExternally.current = true;
-            const editor = editorRef.current;
-            
-            if (editor) {
-                // APPLY THE CHANGE DIRECTLY TO THE MODEL
-                editor.getModel().applyEdits(payload.payload.changes);
+                const editor = editorRef.current;
                 
-                // OPTIONAL: Update local state to ensure React is aware of the change
-                setCode(editor.getValue()); 
-            }
+                if (editor) {
+                    // APPLY THE CHANGE DIRECTLY TO THE MODEL
+                    editor.getModel().applyEdits(payload.payload.changes);
+                    
+                    // OPTIONAL: Update local state to ensure React is aware of the change
+                    setCode(editor.getValue()); 
+                }
 
-            setTimeout(() => { isUpdatingExternally.current = false; }, 50);
+                setTimeout(() => { isUpdatingExternally.current = false; }, 50);
+                }
+        );
+        channel.on(
+            'broadcast',
+            { event: 'request-initial-code' },
+            (payload) => {
+                // A user has requested the current state.
+                const currentCode = editorRef.current?.getValue() || codeRef.current;
+                
+                if (currentCode) {
+                    // 💡 NEW STEP: Send the current code back to the entire channel
+                    channel.send({
+                        type: 'broadcast',
+                        event: 'initial-code-response',
+                        payload: { 
+                            code: currentCode,
+                            userId: localClientIdRef.current // Identify the sender
+                         }
+                    });
+                }
+            }
+        )
+         channel.on(
+            'broadcast',
+            { event: 'initial-code-response' },
+            (payload) => {
+
+                 if (payload.payload.senderId === localClientIdRef.current) {
+            return; // EXIT: Do not process this message
+        }
+                
+                const initialCode = payload.payload.code;
+                
+                // Only update if the current local code is empty (or the default initial load)
+                if (editorRef.current && editorRef.current.getValue() === '') {
+                    editorRef.current.setValue(initialCode);
+                    setCode(initialCode);
+                    codeRef.current = initialCode;
+                }
             }
         );
         channel.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-                // OPTIONAL: Request initial state when subscribing (if needed)
-                // console.log(`Subscribed to Supabase channel: ${channelName}`);
+                //  After subscribing, request the current state
+                channel.send({
+                    type: 'broadcast',
+                    event: 'request-initial-code',
+                    // Use the client's own random ID so the sender knows where to reply
+                    payload: { userId: localClientIdRef.current } 
+                });
             }
+            
         });
         return () => {
             // Unsubscribe and remove the channel when leaving the editor
@@ -74,8 +122,8 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     const handleEditorChanges = (editor) => {
         editorRef.current = editor;
 
-        // Use onDidChangeModelContent to get the list of changes (the "patches")
-        editor.onDidChangeModelContent((event) => {
+            // Use onDidChangeModelContent to get the list of changes (the "patches")
+            editor.onDidChangeModelContent((event) => {
             // If the change came from an external source, do nothing and return.
             if (isUpdatingExternally.current) return;
             
@@ -92,7 +140,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     payload: { 
                         changes: event.changes, // Send the specific changes
                         code: newCode, // Send the full code as a fallback/check
-                        userId: 'user-' + Math.random().toString(36).substring(2, 7)
+                        userId: localClientIdRef.current // Identify the sender
                     }
                 });
             }
