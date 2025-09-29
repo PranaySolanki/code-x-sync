@@ -294,7 +294,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 </Tooltip>
 
 
-                    <select onChange={onChangeLanguage} value={language} disabled={isProcessing}>
+                    <select onChange={onChangeLanguage} value={language} id="s" disabled={isProcessing}>
                         <option value="c">C</option>
                         <option value="java">Java</option>
                         <option value="javascript">Javascript</option>

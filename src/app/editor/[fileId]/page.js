@@ -168,21 +168,22 @@ const PlaygroundScreen = () => {
                         <div className="input-header">
                             <b>Input:</b>
                         </div>
-                        <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Enter Input here" className="input-textarea"></textarea>
+                        <textarea value={input} id="input-code-field" onChange={(e) => setInput(e.target.value)} placeholder="Enter Input here" className="input-textarea"></textarea>
                         <div className="input-bottom-text">If your code takes input, add it in the above box before running.</div>
                     </div>
                 
                     <div className="input-output-container output-section">
-                        <div className="output-header">
+                        <div className="output-header" >
                             <div className="output-text">
                                 <b>Output:</b>
                             </div>
-                            <label htmlFor="output-file-export" className="icon-container exportBtn" onClick={ExportOutput}>
+                            <label className="icon-container exportBtn" onClick={ExportOutput}>
                             <span className="material-symbols-outlined">ios_share</span>
                             <b>Export Output</b>
                             </label>
                         </div>
                         <textarea  
+                            id="output-textarea"
                             className={output.isError ? "error-text" : "output-textarea"} 
                             value={output.text} 
                             readOnly>
