@@ -145,7 +145,7 @@ const PlaygroundScreen = () => {
         
         <div className="playground-container">
             <div className={`header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
-                <Image src="/logo.png" className="logo" alt="logo" width={95} height={95}/>
+                <Image src="/logo.png" className="logo" alt="logo" width={95} height={95} priority/>
                 <span className="beside-logo">CodeXSync</span>
             </div>
 
@@ -177,10 +177,10 @@ const PlaygroundScreen = () => {
                             <div className="output-text">
                                 <b>Output:</b>
                             </div>
-                            <label className="icon-container exportBtn" onClick={ExportOutput}>
+                            <div className="icon-container exportBtn" onClick={ExportOutput}>
                             <span className="material-symbols-outlined">ios_share</span>
                             <b>Export Output</b>
-                            </label>
+                            </div>
                         </div>
                         <textarea  
                             id="output-textarea"
