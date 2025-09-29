@@ -22,6 +22,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
 
     const localClientIdRef = useRef('client-' + Math.random().toString(36).substring(2, 9));
 
+
     useEffect(() => {
         setTitleInput(fileName || "Untitled");
         setLanguage(code_language);
@@ -32,11 +33,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
         // Define a unique channel name using the fileID (e.g., 'project:fileID')
         const channelName = `file_sync:${fileID}`;
         // Create the channel using Supabase client
-        const channel = supabase.channel(channelName, {
-            // You can leave the config object empty {} if you only want the broadcast extension.
-            config: {
-            }
-        });
+        const channel = supabase.channel(channelName);
         channelRef.current = channel;
         channel.on(
             'broadcast',
@@ -48,13 +45,10 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 
                 if (editor) {
                     // APPLY THE CHANGE DIRECTLY TO THE MODEL
-                    editor.getModel().applyEdits(payload.payload.changes);
-                    
-                    // OPTIONAL: Update local state to ensure React is aware of the change
-                    setCode(editor.getValue()); 
-                }
+                    editor.getModel().applyEdits(payload.payload.changes,[]);
+                    }
 
-                setTimeout(() => { isUpdatingExternally.current = false; }, 50);
+                isUpdatingExternally.current = false;
                 }
         );
         channel.on(
@@ -94,7 +88,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     editorRef.current.setValue(initialCode);
                     setCode(initialCode);
                     codeRef.current = initialCode;
-                    setTimeout(() => { isUpdatingExternally.current = false; }, 50);
+                    isUpdatingExternally.current = false;
                 }
             }
             
@@ -147,9 +141,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 });
             }
             
-            // Update local state AFTER broadcasting (or before, consistency depends on your choice)
-            // NOTE: Setting state here is fine for simple display, but the editor already has the new value.
-            setCode(newCode); 
         });
     // ... setup for cursor changes (onDidChangeCursorPosition) ...
     };
@@ -178,7 +169,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             const link = document.createElement("a");
             link.href = downloadURL;
 
-            link.download = `code.${fileExtensionMapping[language]}`
+            link.download = `${fileName}.${fileExtensionMapping[language]}`
             link.click();
         }
         
@@ -331,6 +322,10 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     language={language}
                     theme={theme}
                     options={{
+                        wordWrap: "on",
+                        fontSize: 17,
+                        cursorSmoothCaretAnimation: "on",
+                        cursorBlinking: "expand",
                         minimap:{
                             enabled: false
                         },
