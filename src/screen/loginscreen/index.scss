@@ -129,7 +129,7 @@
           padding: 12px 20px;
           background: rgba(51, 65, 85, 0.5);
           border: 1px solid rgba(71, 85, 105, 0.6);
-          border-radius: 10px;
+          border-radius: 8px; /* MODIFIED */
           color: #e2e8f0;
           font-size: 0.9em;
           font-weight: 500;
@@ -180,16 +180,7 @@
         flex-direction: column;
         align-items: center;
 
-        .icon {
-          position: absolute;
-          top: -22px;
-          left: 50%;
-          transform: translateX(-50%);
-          color: #64748b;
-          font-size: 1.2em;
-          pointer-events: none;
-          z-index: 1;
-        }
+        /* Icon styling removed as it was unused and to clean up the CSS */
 
         input {
           width: 100%;
@@ -201,7 +192,7 @@
           border-radius: 12px;
           outline: none;
           transition: all 0.3s ease;
-          order: 1;
+          order: 2; /* MODIFIED: Set order to 2 (below label) */
 
           &::placeholder {
             color: #64748b;
@@ -212,32 +203,23 @@
             background: rgba(15, 23, 42, 0.8);
             box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08);
           }
-
-          &:focus ~ label,
-          &:not(:placeholder-shown) ~ label {
-            opacity: 1;
-            transform: translateY(0);
-          }
         }
 
         label {
+          /* MODIFIED: Label is now always visible and above input */
+          order: 1; /* MODIFIED: Set order to 1 (above input) */
+          width: 100%; /* ADDED: Ensure label takes full width */
+          text-align: left; /* ADDED: Align text to the left */
+          
           color: #cbd5e1;
-          font-size: 0.85em;
+          font-size: 0.875em; 
           font-weight: 500;
-          margin-top: 8px;
-          opacity: 0;
-          transform: translateY(-5px);
+          
+          margin-bottom: 8px; /* ADDED: Spacing between label and input */
+          margin-top: 0; /* MODIFIED: Reset margin-top */
+          opacity: 1; /* MODIFIED: Always visible */
+          transform: translateY(0); /* MODIFIED: No translation */
           transition: all 0.3s ease;
-          order: 2;
-        }
-
-        // Show label when input has value or focus
-        &.has-value,
-        &:focus-within {
-          label {
-            opacity: 1;
-            transform: translateY(0);
-          }
         }
       }
       .greeting {
@@ -246,7 +228,7 @@
         color: #cbd5e1;
         font-size: 1em;
         font-weight: 500;
-      
+
       }
 
       .remember {
@@ -293,7 +275,7 @@
         color: #fff;
         border: none;
         outline: none;
-        border-radius: 12px;
+        border-radius: 10px; /* MODIFIED */
         cursor: pointer;
         font-size: 1em;
         font-weight: 600;
@@ -414,10 +396,10 @@
 
     .login-register-container {
       width: 100%;
-      
+
       .box-face {
         padding: 40px 28px;
-        
+
         h2 {
           font-size: 2em;
         }
