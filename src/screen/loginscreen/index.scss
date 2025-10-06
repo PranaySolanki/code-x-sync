@@ -124,12 +124,25 @@
         grid-template-columns: 1fr 1fr;
         gap: 12px;
         margin-bottom: 24px;
+        
+        .single-social-login-container {
+            /* MODIFIED: New container for centering the single button */
+            grid-column: 1 / -1; 
+            display: flex;
+            justify-content: center; 
+            
+            .social-btn {
+                width: 70%; /* MODIFIED: Sizing for single button */
+                min-width: 200px;
+                max-width: 300px; 
+            }
+        }
 
         button {
           padding: 12px 20px;
           background: rgba(51, 65, 85, 0.5);
           border: 1px solid rgba(71, 85, 105, 0.6);
-          border-radius: 8px; /* MODIFIED */
+          border-radius: 8px; 
           color: #e2e8f0;
           font-size: 0.9em;
           font-weight: 500;
@@ -180,8 +193,6 @@
         flex-direction: column;
         align-items: center;
 
-        /* Icon styling removed as it was unused and to clean up the CSS */
-
         input {
           width: 100%;
           padding: 14px 16px;
@@ -192,7 +203,7 @@
           border-radius: 12px;
           outline: none;
           transition: all 0.3s ease;
-          order: 2; /* MODIFIED: Set order to 2 (below label) */
+          order: 2; 
 
           &::placeholder {
             color: #64748b;
@@ -206,19 +217,16 @@
         }
 
         label {
-          /* MODIFIED: Label is now always visible and above input */
-          order: 1; /* MODIFIED: Set order to 1 (above input) */
-          width: 100%; /* ADDED: Ensure label takes full width */
-          text-align: left; /* ADDED: Align text to the left */
-          
+          order: 1; 
+          width: 100%;
+          text-align: left; 
           color: #cbd5e1;
           font-size: 0.875em; 
           font-weight: 500;
-          
-          margin-bottom: 8px; /* ADDED: Spacing between label and input */
-          margin-top: 0; /* MODIFIED: Reset margin-top */
-          opacity: 1; /* MODIFIED: Always visible */
-          transform: translateY(0); /* MODIFIED: No translation */
+          margin-bottom: 8px; 
+          margin-top: 0; 
+          opacity: 1; 
+          transform: translateY(0); 
           transition: all 0.3s ease;
         }
       }
@@ -275,7 +283,7 @@
         color: #fff;
         border: none;
         outline: none;
-        border-radius: 10px; /* MODIFIED */
+        border-radius: 10px; 
         cursor: pointer;
         font-size: 1em;
         font-weight: 600;
@@ -318,10 +326,13 @@
         color: #fca5a5;
         padding: 10px 16px;
         border-radius: 8px;
-        margin-bottom: 16px;
+        
+        margin: 0px auto 24px auto; /* ADDED: margin for spacing */
+        display: block; /* ADDED: to ensure it takes up block space */
+        width: 100%; /* ADDED: to ensure it spans full width */
+        
         font-size: 0.875em;
         font-weight: 500;
-        width: 100%;
         text-align: center;
 
         &.success {

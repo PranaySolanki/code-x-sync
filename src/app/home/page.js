@@ -29,6 +29,7 @@ const LandingPage = () => {
     const menuButtonRef = useRef(null);
     const userMenuRef = useRef(null);
     const [currentUserName, setCurrentUserName] = useState(null);
+    const [currentUserAvatar, setCurrentUserAvatar] = useState(null); 
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const router = useRouter();
 
@@ -139,22 +140,27 @@ const LandingPage = () => {
                 const user = session?.user;
                 if (!user) {
                     setCurrentUserName(null);
+                    setCurrentUserAvatar(null); 
                     setIsUserMenuOpen(false);
                     return;
                 }
 
                 const metaName = user.user_metadata?.username || user.user_metadata?.full_name || user.user_metadata?.name;
-                if (metaName) {
-                    setCurrentUserName(metaName);
-                    return;
-                }
+                let finalName = metaName; 
 
                 const { data: profileRow } = await supabase
                     .from('User-Table')
-                    .select('user_name')
+                    .select('user_name, avatar_url') 
                     .eq('user_id', user.id)
                     .maybeSingle();
-                if (profileRow?.user_name) setCurrentUserName(profileRow.user_name);
+
+                if (profileRow) {
+                    if (profileRow.user_name) finalName = profileRow.user_name;
+                    if (profileRow.avatar_url) setCurrentUserAvatar(profileRow.avatar_url); 
+                }
+
+                setCurrentUserName(finalName);
+
             } catch (err) {
                 console.error('Error fetching auth user:', err);
             }
@@ -182,6 +188,7 @@ const LandingPage = () => {
             await supabase.auth.signOut();
             setIsUserMenuOpen(false);
             setCurrentUserName(null);
+            setCurrentUserAvatar(null); 
             router.refresh?.();
         } catch (e) {
             console.error('Logout error:', e);
@@ -253,7 +260,12 @@ const LandingPage = () => {
                                 className="desktop-cta-btn"
                                 onClick={() => setIsUserMenuOpen((v) => !v)}
                             >
-                                <i className="bi bi-person-circle" style={{ marginRight: '8px' }}></i>
+                                {/* MODIFIED: Display Image or Icon */}
+                                {currentUserAvatar ? (
+                                    <img src={currentUserAvatar} alt="User Avatar" className="tw-w-6 tw-h-6 tw-rounded-full tw-object-cover" style={{ marginRight: '8px', width: '24px', height: '24px', borderRadius: '50%' }} />
+                                ) : (
+                                    <i className="bi bi-person-circle" style={{ marginRight: '8px' }}></i>
+                                )}
                                 <span>{currentUserName}</span>
                             </button>
                             {isUserMenuOpen && (
@@ -263,6 +275,7 @@ const LandingPage = () => {
                                         <span>View profile</span>
                                     </a>
                                     <button onClick={handleLogout} className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-2 tw-px-4 tw-py-2 hover:tw-bg-[#ef4444] hover:tw-text-white">
+                                 
                                         <i className="bi bi-box-arrow-right"></i>
                                         <span>Log out</span>
                                     </button>
@@ -293,7 +306,12 @@ const LandingPage = () => {
                         <a className="a nav-link" href="/dashboard" onClick={toggleMenu}>Dashboard</a>
                         {currentUserName ? (
                             <a href="/dashboard" aria-label="user" className="mobile-cta-btn" onClick={toggleMenu}>
-                                <i className="bi bi-person-circle" style={{ marginRight: '8px' }}></i>
+                                {/* MODIFIED: Display Image or Icon in mobile menu */}
+                                {currentUserAvatar ? (
+                                    <img src={currentUserAvatar} alt="User Avatar" className="tw-w-6 tw-h-6 tw-rounded-full tw-object-cover" style={{ marginRight: '8px', width: '24px', height: '24px', borderRadius: '50%' }} />
+                                ) : (
+                                    <i className="bi bi-person-circle" style={{ marginRight: '8px' }}></i>
+                                )}
                                 <span>{currentUserName}</span>
                             </a>
                         ) : (
@@ -517,7 +535,7 @@ const LandingPage = () => {
                                 <ul className="ul tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200">
                                     <li>Lorem ipsum dolor sit amet.</li><li>Lorem, ipsum.</li><li>Lorem, ipsum dolor.</li><li>Lorem ipsum dolor sit.</li>
                                 </ul>
-                                <a href="http://" className="a LPbtn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]">Get now</a>
+                                <a href="http://" className="a LPbtn !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]">Get now</a>
                             </div>
                             <div className="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-2 tw-border-primary tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]">
                                 <h3><span className="h3 tw-text-5xl tw-font-semibold">$19</span><span className="tw-text-2xl tw-text-gray-400">/mo</span></h3>
@@ -525,7 +543,7 @@ const LandingPage = () => {
                                 <ul className="ul tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200">
                                     <li>Lorem ipsum dolor sit amet.</li><li>Lorem, ipsum.</li><li>Lorem, ipsum dolor.</li><li>Lorem ipsum dolor sit.</li>
                                 </ul>
-                                <a href="http://" className="a LPbtn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]">Get now</a>
+                                <a href="http://" className="a LPbtn !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]">Get now</a>
                             </div>
                             <div className="reveal-up tw-flex tw-w-[380px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-[1px] tw-border-outlineColor tw-bg-secondary tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]">
                                 <h3><span className="h3 tw-text-5xl tw-font-semibold">$49</span><span className="tw-text-2xl tw-text-gray-400">/mo</span></h3>
@@ -533,7 +551,7 @@ const LandingPage = () => {
                                 <ul className="ul tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-text-center tw-text-lg tw-text-gray-200">
                                     <li>Lorem ipsum dolor sit amet.</li><li>Lorem, ipsum.</li><li>Lorem, ipsum dolor.</li><li>Lorem ipsum dolor sit.</li>
                                 </ul>
-                                <a href="http://" className="a LPbtn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]">Get now</a>
+                                <a href="http://" className="a LPbtn !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]">Get now</a>
                             </div>
                         </div>
                     </section> */}
@@ -584,7 +602,7 @@ const LandingPage = () => {
                 <footer className="tw-mt-auto tw-flex tw-w-full tw-place-content-around tw-gap-3 tw-p-[5%] tw-px-[10%] tw-text-white max-md:tw-flex-col">
                     <div className="tw-flex tw-h-full tw-w-[250px] tw-flex-col tw-place-items-center tw-gap-6 max-md:tw-w-full">
 
-                        <Image src="/logo.png" alt="logo" className="tw-max-w-[120px]" height={120} width={120} />
+                        <Image src="/logo.png" alt="logo" width={120} height={120} />
 
                         <div>Mumbai,India</div>
                         

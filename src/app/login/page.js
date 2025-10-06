@@ -13,6 +13,7 @@ const LoginScreen = () => {
   const [message, setmessage] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loginMessage, setLoginMessage] = useState("");
+  const [isLoginSuccess, setIsLoginSuccess] = useState(false); 
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -62,6 +63,7 @@ const LoginScreen = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginMessage("");
+    setIsLoginSuccess(false);
 
     const { email, password } = e.target.elements;
 
@@ -74,9 +76,10 @@ const LoginScreen = () => {
       setLoginMessage(error.message);
     } else {
       setLoginMessage("Login successful!");
+      setIsLoginSuccess(true);
       setTimeout(() => {
         router.push("/home");
-      }, 100);
+      }, 1000);
     }
   };
 
@@ -93,18 +96,24 @@ const LoginScreen = () => {
             </div>
 
             {loginMessage && (
-              <span className="form-message">{loginMessage}</span>
+              <span className={`form-message ${isLoginSuccess ? 'success' : ''}`}> 
+                {loginMessage}
+              </span>
             )}
 
             <div className="social-login">
-              <button type="button" className="social-btn github">
+              {/* Uncomment this button if you want the side-by-side layout */}
+              {/* <button type="button" className="social-btn github">
                 <ion-icon name="logo-github"></ion-icon>
                 <span>GitHub</span>
-              </button>
-              <button type="button" className="social-btn google">
-                <ion-icon name="logo-google"></ion-icon>
-                <span>Google</span>
-              </button>
+              </button> */}
+              {/* MODIFIED: Wrap the Google button for centering */}
+              <div className="single-social-login-container">
+                <button type="button" className="social-btn google">
+                  <ion-icon name="logo-google"></ion-icon>
+                  <span>Google</span>
+                </button>
+              </div>
             </div>
 
             <div className="divider"><span>Or continue with Email</span></div>
