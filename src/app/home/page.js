@@ -3,6 +3,8 @@ import React, { useEffect, useState, useRef} from 'react';
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from 'next/image';
+import supabase from "@/helper/supabaseClient";
+import { useRouter } from 'next/navigation';
 // Import your assets here. Make sure the paths are correct.
 import dashboardImg from '@/screen/LandingPage/assets/images/home/dashboard.png';
 // import googleLogo from '@/screen/LandingPage/assets/images/brand-logos/google.svg';
@@ -25,6 +27,10 @@ const LandingPage = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const menuButtonRef = useRef(null);
+    const userMenuRef = useRef(null);
+    const [currentUserName, setCurrentUserName] = useState(null);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const router = useRouter();
 
     
     const toggleMenu = () => {
@@ -126,6 +132,62 @@ const LandingPage = () => {
         return () => ctx.revert(); // This automatically cleans up all GSAP animations and ScrollTriggers
     }, []);
 
+    useEffect(() => {
+        const fetchAuthUser = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const user = session?.user;
+                if (!user) {
+                    setCurrentUserName(null);
+                    setIsUserMenuOpen(false);
+                    return;
+                }
+
+                const metaName = user.user_metadata?.username || user.user_metadata?.full_name || user.user_metadata?.name;
+                if (metaName) {
+                    setCurrentUserName(metaName);
+                    return;
+                }
+
+                const { data: profileRow } = await supabase
+                    .from('User-Table')
+                    .select('user_name')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                if (profileRow?.user_name) setCurrentUserName(profileRow.user_name);
+            } catch (err) {
+                console.error('Error fetching auth user:', err);
+            }
+        };
+
+        fetchAuthUser();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+            fetchAuthUser();
+        });
+        return () => subscription?.unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setIsUserMenuOpen(false);
+            }
+        };
+        if (isUserMenuOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isUserMenuOpen]);
+
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut();
+            setIsUserMenuOpen(false);
+            setCurrentUserName(null);
+            router.refresh?.();
+        } catch (e) {
+            console.error('Logout error:', e);
+        }
+    };
+
         useEffect(() => {
             // --- Menu Closing Logic ---
             const handleClickOutside = (event) => {
@@ -183,11 +245,36 @@ const LandingPage = () => {
                         <a className="a nav-link" href="/dashboard">Dashboard</a>
                     </nav>
 
-                    {/* Desktop "Get Started" Button */}
-                    <a href="/login" aria-label="signup" className="desktop-cta-btn">
-                        <span>Get started</span>
-                        <i className="bi bi-arrow-right"></i>
-                    </a>
+                    {/* Desktop CTA / User Menu */}
+                    {currentUserName ? (
+                        <div ref={userMenuRef} className="tw-relative">
+                            <button
+                                aria-label="user"
+                                className="desktop-cta-btn"
+                                onClick={() => setIsUserMenuOpen((v) => !v)}
+                            >
+                                <i className="bi bi-person-circle" style={{ marginRight: '8px' }}></i>
+                                <span>{currentUserName}</span>
+                            </button>
+                            {isUserMenuOpen && (
+                                <div className="tw-absolute tw-right-0 tw-mt-2 tw-min-w-[180px] tw-rounded-md tw-border tw-border-[#2a2a2a] tw-bg-[#0c0c0c] tw-py-1 tw-shadow-lg">
+                                    <a href="/profile" className="tw-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-px-4 tw-py-2 hover:tw-bg-[#1a1a1a]">
+                                        <i className="bi bi-person"></i>
+                                        <span>View profile</span>
+                                    </a>
+                                    <button onClick={handleLogout} className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-2 tw-px-4 tw-py-2 hover:tw-bg-[#ef4444] hover:tw-text-white">
+                                        <i className="bi bi-box-arrow-right"></i>
+                                        <span>Log out</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <a href="/login" aria-label="signup" className="desktop-cta-btn">
+                            <span>Get started</span>
+                            <i className="bi bi-arrow-right"></i>
+                        </a>
+                    )}
 
                     {/* --- Mobile Elements --- */}
                     <button
@@ -204,9 +291,16 @@ const LandingPage = () => {
                         <a className="a nav-link" href="#working" onClick={toggleMenu}>How it works</a>
                         <a className="a nav-link" href="#faq" onClick={toggleMenu}>FAQ</a>
                         <a className="a nav-link" href="/dashboard" onClick={toggleMenu}>Dashboard</a>
-                        <a href="/login" aria-label="signup" className="mobile-cta-btn" onClick={toggleMenu}>
-                            <span>Get started</span>
-                        </a>
+                        {currentUserName ? (
+                            <a href="/dashboard" aria-label="user" className="mobile-cta-btn" onClick={toggleMenu}>
+                                <i className="bi bi-person-circle" style={{ marginRight: '8px' }}></i>
+                                <span>{currentUserName}</span>
+                            </a>
+                        ) : (
+                            <a href="/login" aria-label="signup" className="mobile-cta-btn" onClick={toggleMenu}>
+                                <span>Get started</span>
+                            </a>
+                        )}
                     </div>
                 </header>
                 <main>
@@ -222,7 +316,11 @@ const LandingPage = () => {
                                     CodeXSync is a real-time collaborative coding environment that lets your team work on the same files, at the same time. No more merge conflicts, no more outdated versions. Just pure, synchronized coding.
                                 </div>
                                 <div className="reveal-up tw-mt-10 tw-flex tw-place-items-center tw-gap-4">
-                                    <a className="a LPbtn" href="/login">Get started</a>                                        
+                                    {currentUserName ? (
+                                        <a className="a LPbtn" href="/dashboard">Go to dashboard</a>
+                                    ) : (
+                                        <a className="a LPbtn" href="/login">Get started</a>
+                                    )}
                                 </div>
                             </div>
                             <div className="reveal-up tw-relative tw-mt-8 tw-flex tw-w-full tw-place-content-center tw-place-items-center" id="dashboard-container">

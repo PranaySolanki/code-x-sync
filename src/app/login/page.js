@@ -3,18 +3,17 @@ import "@/screen/loginscreen/index.scss";
 import { useState } from "react";
 import Script from 'next/script';
 import supabase  from "@/helper/supabaseClient";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation"; // Add this import
+import { useRouter } from "next/navigation"; 
 
-const LoginScreen = () => {                                   // from export const to const and at end export default
+const LoginScreen = () => {                                   
   const [showRegister, setShowRegister] = useState(false);
   const [username, setusername] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   const [message, setmessage] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loginMessage, setLoginMessage] = useState(""); // State for login message
-  const router = useRouter(); // Initialize router
+  const [loginMessage, setLoginMessage] = useState("");
+  const router = useRouter(); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,24 +47,23 @@ const LoginScreen = () => {                                   // from export con
 
             if (profileError) {
               console.log('Profile Creation Error:', profileError.message);
-            }else{
+            }
 
             setmessage("Signup successful! Please check your email to confirm your account.");
             setTimeout(() => {
-              setShowRegister(false); // Flip to login after success
+              setShowRegister(false); 
               setusername("");
               setemail("");
               setpassword("");
               setConfirmPassword("");
               setmessage("");
-            }, 1500); // 1.5 seconds delay for user to read the message
+            }, 1500);
           }
-      }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoginMessage(""); // Clear previous message
+    setLoginMessage("");
 
     const { email, password } = e.target.elements;
 
@@ -78,37 +76,48 @@ const LoginScreen = () => {                                   // from export con
       setLoginMessage(error.message);
     } else {
       setLoginMessage("Login successful!");
-      // Redirect or perform any other action after successful login
       setTimeout(() => {
-        router.push("/"); // Redirect to home page
-      }, 1000); // 1 second delay for user to see the message
+        router.push("/dashboard");
+      }, 1000); 
     }
   };
 
   return (
     <section className="section">  
-    {/* added class name by pranay */}
+        {/* Removed animated-glow-background to simplify and match video */}
       <div className={`login-register-container${showRegister ? " flipped" : ""}`}>
         {/* Login Box */}
         <div className="login-box box-face">
           <form onSubmit={handleLogin} style={{ textAlign: "center" }}>
-            <h2>Login</h2>
+            <div className="header-content">
+                <h2 className="main-title">Code X Sync</h2>
+                <p className="greeting">Welcome back to the future of coding</p>
+            </div>
+            
             {loginMessage && (
               <span className="form-message">{loginMessage}</span>
             )}
+            
+            <div className="social-buttons">
+                <div className="social-btn github">
+                    <ion-icon name="logo-github"></ion-icon>
+                    <span>GitHub</span>
+                </div>
+                <div className="social-btn google">
+                    <ion-icon name="logo-google"></ion-icon>
+                    <span>Google</span>
+                </div>
+            </div>
+            
+            <div className="divider">Or continue with Email</div>
+
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="mail"></ion-icon>
-              </span>
-              <input type="email" name="email" required />
-              <label htmlFor="email">Email:</label>
+              <input type="email" name="email" placeholder="Enter your email" required />
+              <label htmlFor="email">Email</label>
             </div>
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="lock-closed"></ion-icon>
-              </span>
-              <input type="password" name="password" required />
-              <label htmlFor="password">Password:</label>
+              <input type="password" name="password" placeholder="Enter your password" required />
+              <label htmlFor="password">Password</label>
             </div>
             <div className="remember">
               <label>
@@ -118,7 +127,7 @@ const LoginScreen = () => {                                   // from export con
                 Forgot Password?
               </a>
             </div>
-            <button type="submit">Login</button>
+            <button type="submit">Sign in</button>
             <div className="register-link">
               Don&apos;t have an account?{" "}
               <a
@@ -128,59 +137,52 @@ const LoginScreen = () => {                                   // from export con
                   setShowRegister(true);
                 }}
               >
-                Register here
+                Sign up
               </a>
             </div>
           </form>
         </div>
         {/* Registration Box */}
         <div className="register-box box-face">
-          <form action="/register" method="POST" style={{ textAlign: "center" }}>
-            <h2>Register</h2>
+          <form onSubmit={handleSubmit} style={{ textAlign: "center" }}>
+            <div className="header-content">
+                <h2 className="main-title">Code X Sync</h2>
+                <p className="greeting">Join the collaborative coding community</p>
+            </div>
+
             {message && (
               <span className="form-message">{message}</span>
             )}
+
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="person"></ion-icon>
-              </span>
               <input
                 onChange={(e) => setusername(e.target.value)}
                 value={username}
-                type="text" name="username" required />
-              <label htmlFor="username">Full Name:</label>
+                type="text" name="username" placeholder="Enter your full name" required />
+              <label htmlFor="username">Full Name</label>
             </div>
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="mail"></ion-icon>
-              </span>
               <input 
               onChange={(e) => {setemail(e.target.value);}}
               value={email} 
-              type="email" name="email" required />
-              <label htmlFor="email">Email:</label>
+              type="email" name="email" placeholder="Enter your email" required />
+              <label htmlFor="email">Email</label>
             </div>
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="lock-closed"></ion-icon>
-              </span>
               <input 
                 onChange={(e) => {setpassword(e.target.value);}}
                 value={password}
-                type="password" name="password" required />
-              <label htmlFor="password">Password:</label>
+                type="password" name="password" placeholder="Enter password" required />
+              <label htmlFor="password">Password</label>
             </div>
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="lock-closed"></ion-icon>
-              </span>
               <input
                  onChange={(e) => setConfirmPassword(e.target.value)}
                 value={confirmPassword}
-                type="password" name="confirmPassword" required />
-              <label htmlFor="confirmPassword">Confirm Password:</label>
+                type="password" name="confirmPassword" placeholder="Confirm password" required />
+              <label htmlFor="confirmPassword">Confirm Password</label>
             </div>
-            <button onClick={handleSubmit} type="submit" >Register</button>
+            <button type="submit" >Sign up</button>
             <div className="register-link">
               Already have an account?{" "}
               <a
@@ -190,13 +192,13 @@ const LoginScreen = () => {                                   // from export con
                   setShowRegister(false);
                 }}
               >
-                Login here
+                Sign in
               </a>
             </div>
           </form>
         </div>
       </div>
-      {/* Ionicons Scripts */}
+      {/* Ionicons Scripts for icons in the video (logo-github, mail-outline, lock-closed-outline) */}
       <Script
         type="module"
         src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
