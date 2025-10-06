@@ -1,5 +1,3 @@
-/* pranaysolanki/code-x-sync/code-x-sync-8aab366aa30db2d0bf54a90ee6fef547cb693bec/src/app/login/page.js */
-
 'use client';
 import "@/screen/loginscreen/index.scss";
 import { useState } from "react";
@@ -49,7 +47,7 @@ const LoginScreen = () => {
 
             if (profileError) {
               console.log('Profile Creation Error:', profileError.message);
-            }else{
+            }
 
             setmessage("Signup successful! Please check your email to confirm your account.");
             setTimeout(() => {
@@ -61,7 +59,6 @@ const LoginScreen = () => {
               setmessage("");
             }, 1500);
           }
-      }
   };
 
   const handleLogin = async (e) => {
@@ -80,13 +77,14 @@ const LoginScreen = () => {
     } else {
       setLoginMessage("Login successful!");
       setTimeout(() => {
-        router.push("/home"); // Redirect to home
+        router.push("/dashboard");
       }, 1000); 
     }
   };
 
   return (
     <section className="section">  
+        {/* Removed animated-glow-background to simplify and match video */}
       <div className={`login-register-container${showRegister ? " flipped" : ""}`}>
         {/* Login Box */}
         <div className="login-box box-face">
@@ -101,11 +99,11 @@ const LoginScreen = () => {
             )}
             
             <div className="social-buttons">
-                <div className="social-btn">
+                <div className="social-btn github">
                     <ion-icon name="logo-github"></ion-icon>
                     <span>GitHub</span>
                 </div>
-                <div className="social-btn">
+                <div className="social-btn google">
                     <ion-icon name="logo-google"></ion-icon>
                     <span>Google</span>
                 </div>
@@ -114,16 +112,10 @@ const LoginScreen = () => {
             <div className="divider">Or continue with Email</div>
 
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="mail-outline"></ion-icon>
-              </span>
               <input type="email" name="email" placeholder="Enter your email" required />
               <label htmlFor="email">Email</label>
             </div>
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="lock-closed-outline"></ion-icon>
-              </span>
               <input type="password" name="password" placeholder="Enter your password" required />
               <label htmlFor="password">Password</label>
             </div>
@@ -163,9 +155,6 @@ const LoginScreen = () => {
             )}
 
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="person-outline"></ion-icon>
-              </span>
               <input
                 onChange={(e) => setusername(e.target.value)}
                 value={username}
@@ -173,9 +162,6 @@ const LoginScreen = () => {
               <label htmlFor="username">Full Name</label>
             </div>
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="mail-outline"></ion-icon>
-              </span>
               <input 
               onChange={(e) => {setemail(e.target.value);}}
               value={email} 
@@ -183,9 +169,6 @@ const LoginScreen = () => {
               <label htmlFor="email">Email</label>
             </div>
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="lock-closed-outline"></ion-icon>
-              </span>
               <input 
                 onChange={(e) => {setpassword(e.target.value);}}
                 value={password}
@@ -193,9 +176,6 @@ const LoginScreen = () => {
               <label htmlFor="password">Password</label>
             </div>
             <div className="input-box">
-              <span className="icon">
-                <ion-icon name="lock-closed-outline"></ion-icon>
-              </span>
               <input
                  onChange={(e) => setConfirmPassword(e.target.value)}
                 value={confirmPassword}
