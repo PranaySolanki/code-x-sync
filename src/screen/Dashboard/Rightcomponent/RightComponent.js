@@ -1,6 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
-import React, { use, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
 import { FcOpenedFolder } from 'react-icons/fc';
 import Image from 'next/image';
@@ -8,7 +7,7 @@ import logo from '@/assets/logo.png';
 import { ModalContext } from '@/screen/Dashboard/components/Dialog_box_state';
 import { PlaygroundContext } from '@/screen/Dashboard/components/DataStoreContext';
 import { useRouter } from 'next/navigation';
-import  supabase  from '@/helper/supabaseClient';
+import supabase from '@/helper/supabaseClient';
 import { Tooltip } from "@mui/material";
 
 const StyledRightComponent = styled.div`
@@ -24,9 +23,26 @@ const StyledRightComponent = styled.div`
         width: 100%;
         padding: 1rem 0.5rem;
     }
-        
 `;
 
+const TabsContainer = styled.div`
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #ccc;
+`;
+
+const Tab = styled.div`
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: ${props => props.$active ? '700' : '400'};
+    border-bottom: ${props => props.$active ? '3px solid #000' : 'none'};
+    transition: all 0.3s ease;
+
+    &:hover {
+        font-weight: 700;
+    }
+`;
 
 const Header = styled.div`
   display: flex;
@@ -44,7 +60,7 @@ const Heading = styled.h3`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  span{
+  span {
     font-weight: 700;
   }
 `;
@@ -57,12 +73,12 @@ const AddButton = styled.div`
     align-items: center;
     transition: transform 0.3s ease-in-out;
     gap: 0.25rem;
-    span{
+    span {
         font-size: 1.5rem;
         font-weight: 700;
     }
 
-    &:hover{
+    &:hover {
         cursor: pointer;
         transform: scale(1.1);
     }
@@ -100,11 +116,11 @@ const Card = styled.div`
     cursor: pointer;
     transition: all 0.5s ease-in-out;
 
-    &:hover{
-      scale: 1.02;
-      outline: 2px solid white;
-      box-shadow: 10px 10px 5px gray;
-      transition: all 0.3s ease-in-out;
+    &:hover {
+        scale: 1.02;
+        outline: 2px solid white;
+        box-shadow: 10px 10px 5px gray;
+        transition: all 0.3s ease-in-out;
     }
 `;
 
@@ -113,8 +129,7 @@ const CardContainer = styled.div`
   justify-content: space-between;
 `;
 
-const CardContent = styled.div`
-`;
+const CardContent = styled.div``;
 
 const Logo = styled(Image)`
     width: 50px;
@@ -140,156 +155,132 @@ const ArrowIcon = styled.span`
   margin-left: 1rem;
   transition: transform 0.3s ease-in-out;
   transform: ${props => props.$isOpen ? 'rotate(0deg)' : 'rotate(180deg)'};
-  user-select: none;  
+  user-select: none;
 `;
 
 const RightComponent = () => {
   const router = useRouter();
-
   const { openModal } = useContext(ModalContext);
   const { folders, deleteFolder, deleteCard } = useContext(PlaygroundContext);
- const [currentUserId, setCurrentUserId] = useState(null);
 
- const [openFolders, setOpenFolders] = useState({});
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [openFolders, setOpenFolders] = useState({});
+  const [activeTab, setActiveTab] = useState('myProjects');
 
- // Function to toggle the visibility of a folder
- const toggleFolder = (folderId) => {
-   setOpenFolders(prevState => ({
-     ...prevState,
-     [folderId]: !prevState[folderId],
-   }));
- };
+  const toggleFolder = (folderId) => {
+    setOpenFolders(prev => ({
+      ...prev,
+      [folderId]: !prev[folderId],
+    }));
+  };
 
-  //  Fetch the user ID on component mount
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUserId(user.id);
-      }
-    };
-    fetchUser();
-  }, []);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setCurrentUserId(user.id);
+    };
+    fetchUser();
+  }, []);
 
-  // Function to check if the current user is the owner of the project  
+  const check_isOwner = (ownerID) => currentUserId && String(currentUserId) === String(ownerID);
 
-  const check_isOwner = (ownerID) => {
-  return currentUserId && String(currentUserId) === String(ownerID);
-}
+  const renderFolder = (folderId, folder, isOwner = true) => (
+    <FolderCard key={folderId}>
+      <Header>
+        <Heading size="small" onClick={() => toggleFolder(folderId)} style={{ cursor: 'pointer' }}>
+          <FcOpenedFolder /> {folder.title}
+        </Heading>
+        <FolderIcons>
+          {isOwner && (
+            <>
+              <Tooltip title="Delete Project"><Icon className="material-icons" onClick={() => deleteFolder(folderId)}>delete</Icon></Tooltip>
+              <Tooltip title="Edit Project"><Icon className="material-icons" onClick={() => openModal({
+                show: true,
+                modalType: 3,
+                identifiers: { folderId, cardId: "", folderData: { title: folder.title } }
+              })}>edit</Icon></Tooltip>
+              <Tooltip title="Share Project"><Icon className="material-icons" onClick={() => openModal({
+                show: true,
+                modalType: 5,
+                identifiers: { folderId, cardId: "", folderData: { TeamEmails: folder.sharedWith } }
+              })}>groups</Icon></Tooltip>
+              <Tooltip title="Add New File"><AddButton onClick={() => openModal({
+                show: true,
+                modalType: 2,
+                identifiers: { folderId, cardId: "" }
+              })}><span>+</span> New File</AddButton></Tooltip>
+            </>
+          )}
+          <Tooltip title={openFolders[folderId] ? "Collapse" : "Expand"}>
+            <ArrowIcon $isOpen={openFolders[folderId]} className="material-icons" onClick={() => toggleFolder(folderId)}>arrow_drop_up</ArrowIcon>
+          </Tooltip>
+        </FolderIcons>
+      </Header>
+
+      <PlayGroundCards $isOpen={openFolders[folderId]}>
+        {Object.entries(folder.playgrounds).map(([playgroundId, playground]) => (
+          <Card key={playgroundId} onClick={() => router.push(`/editor/${playgroundId}`)}>
+            <CardContainer>
+              <Logo src={logo} alt="logo" width={70} height={70} />
+              <CardContent>
+                <p>{playground.title}</p>
+                <p>Language: {playground.language}</p>
+              </CardContent>
+            </CardContainer>
+            {isOwner && (
+              <FolderIcons onClick={(e) => e.stopPropagation()}>
+                <Tooltip title="Delete File"><Icon className="material-icons" onClick={() => deleteCard(folderId, playgroundId)}>delete</Icon></Tooltip>
+                <Tooltip title="Edit File"><Icon className="material-icons" onClick={() => openModal({
+                  show: true,
+                  modalType: 4,
+                  identifiers: {
+                    folderId,
+                    cardId: playgroundId,
+                    fileData: { title: playground.title, language: playground.language }
+                  }
+                })}>edit</Icon></Tooltip>
+              </FolderIcons>
+            )}
+          </Card>
+        ))}
+      </PlayGroundCards>
+    </FolderCard>
+  );
+
+  const myProjects = Object.entries(folders)
+    .filter(([_, folder]) => check_isOwner(folder.owner_id));
+
+  const sharedProjects = Object.entries(folders)
+    .filter(([_, folder]) => !check_isOwner(folder.owner_id));
 
   return (
     <StyledRightComponent>
       <Header>
         <Heading size="large">
-          My <span>Projects</span>
+          Projects
         </Heading>
-          <Tooltip title="Add New Project" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-            <AddButton onClick={() => openModal({
-              show: true,
-              modalType: 1,
-              identifiers: {
-                folderId: "",
-                cardId: "",
-              }
-            })}> 
-              <span>+</span>New Project
-            </AddButton>
+        <Tooltip title="Add New Project">
+          <AddButton onClick={() => openModal({
+            show: true,
+            modalType: 1,
+            identifiers: { folderId: "", cardId: "" }
+          })}>
+            <span>+</span> New Project
+          </AddButton>
         </Tooltip>
       </Header>
 
-      {
-        Object.entries(folders).map(([folderId, folder]) => (
-          <FolderCard key={folderId} >
-            <Header>
-              <Heading size="small" onClick={() => toggleFolder(folderId)} style={{cursor: 'pointer'}}>
-                <FcOpenedFolder /> {folder.title}
-              </Heading>
-              <FolderIcons>
-                {check_isOwner(folder.owner_id) && (
-                  <>
-                    <Tooltip title="Delete Project" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                      <Icon className="material-icons" onClick={() => deleteFolder(folderId)}>delete</Icon>
-                    </Tooltip>
-                    <Tooltip title="Edit Project" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                      <Icon className="material-icons" onClick={() => openModal({
-                        show: true,
-                        modalType: 3,
-                        identifiers: {
-                          folderId: folderId,
-                          cardId: "",
-                          folderData: { title: folder.title}
-                        }
-                      })} >edit</Icon>
-                    </Tooltip>
-                    <Tooltip title="Share Project" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                      <Icon className="material-icons" onClick={() => openModal({
-                        show: true,
-                        modalType: 5,
-                        identifiers: { folderId: folderId, 
-                          cardId: "", 
-                          folderData: { TeamEmails : folder.sharedWith }
-                        }
-                      })} >groups</Icon>
-                    </Tooltip>
-                    <Tooltip title="Add New File" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                      <AddButton onClick={() => openModal({
-                        show: true,
-                        modalType: 2,
-                        identifiers: {
-                          folderId: folderId,
-                          cardId: "",
-                        }
-                      })}><span>+</span> New File</AddButton>
-                    </Tooltip>
-                  </>
-                )}
-                <Tooltip title={openFolders[folderId] ? "Collapse" : "Expand"} placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                  <ArrowIcon $isOpen={openFolders[folderId]} className="material-icons" onClick={() => toggleFolder(folderId)}>arrow_drop_up</ArrowIcon>
-                </Tooltip>
-              </FolderIcons>
-            </Header>
+      <TabsContainer>
+        <Tab $active={activeTab === 'myProjects'} onClick={() => setActiveTab('myProjects')}>
+          My Projects
+        </Tab>
+        <Tab $active={activeTab === 'sharedProjects'} onClick={() => setActiveTab('sharedProjects')}>
+          Shared Projects
+        </Tab>
+      </TabsContainer>
 
-            
-            <PlayGroundCards $isOpen={openFolders[folderId]}>
-              {
-                Object.entries(folder.playgrounds).map(([playgroundId, playground]) => (
-                  <Card key={playgroundId} onClick={() => {
-                    router.push(`/editor/${playgroundId}`);
-                  }}>
-                    <CardContainer>
-                      <Logo src={logo} alt="logo" width={70} height={70} />
-                      <CardContent>
-                        <p>{playground.title}</p>
-                        <p>Language: {playground.language}</p>
-                      </CardContent>
-                    </CardContainer>
-                    {check_isOwner(folder.owner_id) && (
-                    <FolderIcons onClick={(e) => {
-                      e.stopPropagation();
-                    }}>
-                      <Tooltip title="Delete File" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                        <Icon className="material-icons" onClick={() => deleteCard(folderId, playgroundId)} >delete</Icon>
-                      </Tooltip>
-                      <Tooltip title="Edit File" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                        <Icon className="material-icons" onClick={() => openModal({
-                          show: true,
-                          modalType: 4,
-                          identifiers: {
-                            folderId: folderId,
-                            cardId: playgroundId,
-                            fileData: { title: playground.title, language: playground.language }
-                          }
-                        })} >edit</Icon>
-                      </Tooltip>
-                    </FolderIcons>
-                    )}
-                  </Card>
-                ))
-              }
-            </PlayGroundCards>
-          </FolderCard>
-        ))
-      }
+      {activeTab === 'myProjects' && myProjects.map(([folderId, folder]) => renderFolder(folderId, folder, true))}
+      {activeTab === 'sharedProjects' && sharedProjects.map(([folderId, folder]) => renderFolder(folderId, folder, false))}
     </StyledRightComponent>
   );
 };
