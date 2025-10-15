@@ -10,7 +10,8 @@ const ModalOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,51 +19,141 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background-color: white;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+  backdrop-filter: blur(20px);
   padding: 2rem;
-  border-radius: 8px;
+  border-radius: 16px;
   width: 400px;
   max-width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+  }
 `;
 
 const ModalHeader = styled.h2`
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  color: #e2e8f0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 const ModalForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 `;
 
 const Input = styled.input`
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: 0.95em;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s ease;
+
+  &::placeholder {
+    color: #64748b;
+  }
+
+  &:focus {
+    border-color: #06b6d4;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08);
+  }
 `;
 
 const Select = styled.select`
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: 0.95em;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:focus {
+    border-color: #06b6d4;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08);
+  }
+
+  option {
+    background: #1e293b;
+    color: #e2e8f0;
+  }
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
+  margin-top: 0.5rem;
 `;
 
 const Button = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 12px 24px;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
-  background-color: ${props => props.$primary ? '#007bff' : '#6c757d'};
-  color: white;
+  font-size: 0.95em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: ${props => props.$primary 
+    ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' 
+    : 'rgba(30, 41, 59, 0.6)'};
+  color: ${props => props.$primary ? '#fff' : '#e2e8f0'};
+  border: 1px solid ${props => props.$primary 
+    ? 'transparent' 
+    : 'rgba(71, 85, 105, 0.4)'};
+  box-shadow: ${props => props.$primary 
+    ? '0 4px 14px rgba(6, 182, 212, 0.3)' 
+    : '0 2px 8px rgba(0, 0, 0, 0.1)'};
 
   &:hover {
-    opacity: 0.8;
+    transform: translateY(-2px);
+    background: ${props => props.$primary 
+      ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' 
+      : 'rgba(30, 41, 59, 0.8)'};
+    box-shadow: ${props => props.$primary 
+      ? '0 6px 20px rgba(6, 182, 212, 0.45)' 
+      : '0 4px 12px rgba(0, 0, 0, 0.2)'};
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
