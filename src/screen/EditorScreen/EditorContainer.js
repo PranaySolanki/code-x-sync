@@ -4,7 +4,9 @@ import "./EditorContainer.scss"
 import Editor from "@monaco-editor/react";
 import  executeCode  from "./CompilerAPI";
 import { Tooltip } from "@mui/material";
-import supabase from '@/helper/supabaseClient'; 
+import supabase from '@/helper/supabaseClient';
+import RunPopup from './RunPopup';
+
 
 const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner,fileID }) => {
 
@@ -21,12 +23,15 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     const codeRef = useRef();
 
     const localClientIdRef = useRef('client-' + Math.random().toString(36).substring(2, 9));
+    const [showRunPopup, setShowRunPopup] = useState(false); // controls popup visibility
+    const [popupCode, setPopupCode] = useState(""); // stores code snapshot when Run is clicked
+
 
 
     useEffect(() => {
         setTitleInput(fileName || "Untitled");
         setLanguage(code_language);
-    }, [fileName], [code_language]);
+    }, [fileName, code_language]);
 
     useEffect(() => {
         if (!fileID) return;
@@ -207,31 +212,43 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
 
     }
 
-    const RunCode = async() => {
-    const sourceCode = codeRef.current;
-    if (!sourceCode){
-        onCodeRun({ text: "", isError: false });
-        alert("Please write some code to run!")
-        return;
-    }
-    setIsProcessing(true);
-    onCodeRun({ text: "Processing Please Wait!...", isError: false });
-    try {
-      const { run: result } = await executeCode(language, sourceCode, input);
+    // Handler invoked when user clicks "Run" in the popup. Runs the provided code snapshot.
+    const handlePopupRun = async (codeToRun) => {
+        setShowRunPopup(false);
 
-      if (result.stderr) {
+        const sourceCode = (codeToRun || codeRef.current);
+        if (!sourceCode) {
+            onCodeRun({ text: "", isError: false });
+            alert("Please write some code to run!");
+            return;
+        }
+
+        setIsProcessing(true);
+        onCodeRun({ text: "Processing Please Wait!...", isError: false });
+        try {
+            const { run: result } = await executeCode(language, sourceCode, input);
+
+            if (result?.stderr) {
                 onCodeRun({ text: result.stderr, isError: true });
             } else {
-                onCodeRun({ text: result.stdout, isError: false });
+                onCodeRun({ text: result?.stdout || "", isError: false });
             }
-
         } catch (error) {
             console.error(error);
             onCodeRun({ text: "Failed to connect to the API or an error occurred.", isError: true });
         } finally {
-            setIsProcessing(false); 
+            setIsProcessing(false);
         }
-  };
+    };
+
+    const handleRunClick = () => {
+        // capture current editor snapshot and show the popup
+        const currentValue = editorRef.current ? editorRef.current.getValue() : codeRef.current;
+        setPopupCode(currentValue || "");
+        setShowRunPopup(true);
+    };
+
+ 
 
 
     return(
@@ -338,9 +355,19 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     onMount={handleEditorChanges}
                     value={code}
                 />
+            
+            {showRunPopup && (
+                <RunPopup
+                    code={popupCode}
+                    language={language}
+                    onClose={() => setShowRunPopup(false)}
+                    onRun={handlePopupRun}
+                />
+            )}
+
             </div>
             <div className={`editor-footer ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
-                <button className="Runbtn" onClick={RunCode} disabled={isProcessing} >
+                <button  className="Runbtn" onClick={handleRunClick} disabled={isProcessing} >
                     <span className="material-icons runArrow">play_arrow</span>
                     <span>{isProcessing ? "Running..." : "Run Code"}</span>
                 </button>
