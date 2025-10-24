@@ -20,40 +20,46 @@ const PlaygroundScreen = () => {
     const [title, setTitle] = useState(fileNameParam || "Untitled");
 
     useEffect(() => {
+        console.log('PlaygroundScreen mounted with fileId:', fileId);
         if (fileId) {
             loadFileContent();
         }
     }, [fileId]);
 
     const loadFileContent = async () => {
-        // Load file content from database
-        const { data, error } = await supabase
-            .from('files')
-            .select('content')
-            .eq('id', fileId)
-            .single();
-        
-        if (data) {
-            setCode(data.content);
+        try {
+            console.log('Loading file content for fileId:', fileId);
+            // Load file content from database
+            const { data, error } = await supabase
+                .from('File-Table')
+                .select('content')
+                .eq('file_id', fileId)
+                .single();
+            
+            if (error) {
+                console.error('Error loading file content:', error);
+            } else if (data) {
+                console.log('Loaded file content:', data.content);
+                setCode(data.content || '');
+            }
+        } catch (error) {
+            console.error('Error loading file content:', error);
         }
     };
 
     const saveCode = async (newCode) => {
-        if (fileId) {
-            const { data, error } = await supabase
-                .from('files')
-                .update({ content: newCode })
-                .eq('id', fileId);
-        }
+        // This function is now only used for real-time updates, not for saving
+        // The actual saving is handled by the manual save button in EditorContainer
+        setCode(newCode);
     };
 
     const saveTitle = async (newTitle) => {
         setTitle(newTitle);
         if (fileId) {
             const { data, error } = await supabase
-                .from('files')
-                .update({ name: newTitle })
-                .eq('id', fileId);
+                .from('File-Table')
+                .update({ file_name: newTitle })
+                .eq('file_id', fileId);
         }
     };
 
@@ -90,10 +96,12 @@ const PlaygroundScreen = () => {
                     onCodeRun={setOutput} 
                     input={input}
                     code={code}
-                    language={fileLanguage?.toLowerCase()}
+                    code_language={fileLanguage?.toLowerCase()}
                     onCodeChange={saveCode}
                     fileName={title}
                     onTitleChange={saveTitle}
+                    fileID={fileId}
+                    isOwner={true}
                 />
                 <div className="right-playground-container">
                     <div className="input-output-container ">

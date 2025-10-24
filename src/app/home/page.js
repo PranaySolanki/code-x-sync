@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef} from 'react';
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from 'next/image';
-import supabase from "@/helper/supabaseClient";
+import supabase, { getSessionWithErrorHandling, handleAuthError } from "@/helper/supabaseClient";
 import { useRouter } from 'next/navigation';
 // Import your assets here. Make sure the paths are correct.
 import dashboardImg from '@/screen/LandingPage/assets/images/home/dashboard.png';
@@ -136,9 +136,10 @@ const LandingPage = () => {
     useEffect(() => {
         const fetchAuthUser = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const { session, error } = await getSessionWithErrorHandling(router);
                 const user = session?.user;
-                if (!user) {
+                
+                if (!user || error) {
                     setCurrentUserName(null);
                     setCurrentUserAvatar(null); 
                     setIsUserMenuOpen(false);
@@ -162,16 +163,25 @@ const LandingPage = () => {
                 setCurrentUserName(finalName);
 
             } catch (err) {
-                console.error('Error fetching auth user:', err);
+                const wasHandled = await handleAuthError(err, router);
+                if (!wasHandled) {
+                    console.error('Error fetching auth user:', err);
+                }
             }
         };
 
         fetchAuthUser();
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-            fetchAuthUser();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_OUT') {
+                setCurrentUserName(null);
+                setCurrentUserAvatar(null);
+                setIsUserMenuOpen(false);
+            } else if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+                fetchAuthUser();
+            }
         });
         return () => subscription?.unsubscribe();
-    }, []);
+    }, [router]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

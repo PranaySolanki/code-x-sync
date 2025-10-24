@@ -136,8 +136,8 @@ const PlayGroundCards = styled.div`
 const CollapsibleContent = styled.div`
     transition: all 0.3s ease;
     overflow: hidden;
-    max-height: ${props => props.isOpen ? '1000px' : '0'};
-    opacity: ${props => props.isOpen ? '1' : '0'};
+    max-height: ${props => props.$isOpen ? '1000px' : '0'};
+    opacity: ${props => props.$isOpen ? '1' : '0'};
 `;
 
 const FolderHeader = styled.div`
@@ -272,7 +272,7 @@ const RightComponent = () => {
               </FolderIcons>
             </FolderHeader>
 
-            <CollapsibleContent isOpen={!collapsedFolders[folderId]}>
+            <CollapsibleContent $isOpen={!collapsedFolders[folderId]}>
               <PlayGroundCards>
                 {
                   Object.entries(folder.playgrounds).map(([playgroundId, playground]) => (

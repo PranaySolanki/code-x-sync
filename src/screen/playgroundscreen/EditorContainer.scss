@@ -22,9 +22,68 @@
             background-color:rgb(31, 167, 212) ;
             cursor: pointer;
             transition-duration: 0.4s;
+            color: white;
+            font-weight: 500;
         }
         .saveBtn:hover{
             background-color: rgb(0, 112, 150);
+        }
+        .saveBtn.saved{
+            background-color: #4caf50;
+            cursor: default;
+        }
+        .saveBtn.saved:hover{
+            background-color: #4caf50;
+        }
+        .saveBtn.unsaved{
+            background-color: rgb(31, 167, 212);
+        }
+        .saveBtn.unsaved:hover{
+            background-color: rgb(0, 112, 150);
+        }
+        .auto-save-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #666;
+            margin-right: 10px;
+            
+            .saving-indicator {
+                color: #ff9800;
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                .material-symbols-outlined {
+                    animation: spin 1s linear infinite;
+                    font-size: 14px;
+                }
+            }
+            
+            .saved-indicator {
+                color: #4caf50;
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                .material-symbols-outlined {
+                    font-size: 14px;
+                }
+            }
+            
+            .unsaved-indicator {
+                color: #f44336;
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                .material-symbols-outlined {
+                    font-size: 14px;
+                }
+            }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         .title{
             font-size: 20px;
@@ -172,6 +231,30 @@
             color: #d4d4d4;
             .btn:hover{
                 color: white;
+            }
+        }
+        .saveBtn.saved{
+            background-color: #4caf50;
+            cursor: default;
+        }
+        .saveBtn.saved:hover{
+            background-color: #4caf50;
+        }
+        .saveBtn.unsaved{
+            background-color: rgb(31, 167, 212);
+        }
+        .saveBtn.unsaved:hover{
+            background-color: rgb(0, 112, 150);
+        }
+        .auto-save-status {
+            .saving-indicator {
+                color: #ffb74d;
+            }
+            .saved-indicator {
+                color: #81c784;
+            }
+            .unsaved-indicator {
+                color: #e57373;
             }
         }
     }

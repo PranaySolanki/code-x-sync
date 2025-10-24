@@ -12,6 +12,17 @@ const RightComponent = () => {
 
     useEffect(() => {
         fetchProjects();
+        
+        // Refresh data when user returns to dashboard from playground
+        const handleFocus = () => {
+            fetchProjects();
+        };
+        
+        window.addEventListener('focus', handleFocus);
+        
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+        };
     }, []);
 
     const fetchProjects = async () => {
