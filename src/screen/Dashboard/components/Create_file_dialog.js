@@ -28,7 +28,7 @@ const ModalContent = styled.div`
 
 const ModalHeader = styled.h2`
   margin-bottom: 1rem;
-  colour : black;
+  color: black;
 `;
 
 const ModalForm = styled.form`
