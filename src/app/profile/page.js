@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import supabase from '@/helper/supabaseClient'; 
+import supabase, { getSessionWithErrorHandling, handleAuthError } from '@/helper/supabaseClient'; 
 import { useRouter } from 'next/navigation';
 import '@/screen/profilescreen/index.scss';
 
@@ -38,15 +38,19 @@ const ProfilePage = () => {
     useEffect(() => {
         const load = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const { session, error } = await getSessionWithErrorHandling(router);
                 const user = session?.user;
-                if (!user) {
+                
+                if (!user || error) {
                     router.replace('/login');
                     return;
                 }
                 await fetchProfileData(user);
             } catch (e) {
-                console.error(e);
+                const wasHandled = await handleAuthError(e, router);
+                if (!wasHandled) {
+                    console.error('Profile load error:', e);
+                }
             } finally {
                 setIsLoading(false);
             }
