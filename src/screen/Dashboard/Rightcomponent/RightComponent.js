@@ -59,6 +59,7 @@ const Heading = styled.h3`
   font-weight: 400;
   display: flex;
   align-items: center;
+  color: black;
   gap: 0.5rem;
   span {
     font-weight: 700;
@@ -93,6 +94,7 @@ const FolderIcons = styled.div`
     align-items: center;
     gap: 0.7rem;
     cursor: pointer;
+    color: black;
 `;
 
 const PlayGroundCards = styled.div`
@@ -144,6 +146,7 @@ const Logo = styled(Image)`
 
 const Icon = styled.span`
   transition: transform 0.3s ease-in-out;
+  color: black;
   user-select: none;
   &:hover {
     transform: scale(1.2);
@@ -153,6 +156,7 @@ const Icon = styled.span`
 
 const ArrowIcon = styled.span`
   margin-left: 1rem;
+  color: black;
   transition: transform 0.3s ease-in-out;
   transform: ${props => props.$isOpen ? 'rotate(0deg)' : 'rotate(180deg)'};
   user-select: none;
