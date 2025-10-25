@@ -15,7 +15,10 @@ const StyledRightComponent = styled.div`
     top: 0;
     left: 40%;
     width: 57%;
-    padding: 2rem;
+    height:100vh;
+    overflow-y: auto;
+    padding-bottom: 20rem;
+    padding: 3rem;
     background-color: white;
 
     @media (max-width: 768px){
@@ -132,7 +135,9 @@ const CardContainer = styled.div`
   justify-content: space-between;
 `;
 
-const CardContent = styled.div``;
+const CardContent = styled.div`
+  color: black;
+  `;
 
 const Logo = styled(Image)`
     width: 50px;
