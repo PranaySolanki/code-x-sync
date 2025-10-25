@@ -136,8 +136,8 @@ const CardContainer = styled.div`
 `;
 
 const CardContent = styled.div`
-  color: black;
-  `;
+  colour: black;
+ `;
 
 const Logo = styled(Image)`
     width: 50px;
