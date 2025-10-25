@@ -5,23 +5,28 @@ const API = axios.create({
 });
 
 const LANGUAGE_VERSIONS = {
-    c: "10.2.0",
-    python: "3.10.0",
-    java: "15.0.2",
-    javascript: "18.15.0",
+  c: "10.2.0",
+  python: "3.10.0",
+  java: "15.0.2",
+  // Use node version for JavaScript execution
+  javascript: "18.15.0",
 };
 
 const executeCode = async (language, sourceCode, stdin) => {
-  const response = await API.post("/execute", {
-    language: language,
-    version: LANGUAGE_VERSIONS[language],
-    files: [
-      {
-        content: sourceCode,
-      },
-    ],
-    stdin: stdin,
-  });
-  return response.data;z
+  try {
+    // Some runtimes expect specific language identifiers; keep 'javascript' but ensure version matches Node
+    const payload = {
+      language: language,
+      version: LANGUAGE_VERSIONS[language],
+      files: [{ content: sourceCode }],
+      stdin: stdin,
+    };
+
+    const response = await API.post('/execute', payload);
+    return response.data;
+  } catch (err) {
+    console.error('executeCode error', err?.response?.data || err.message || err);
+    throw err;
+  }
 };
 export default executeCode;
