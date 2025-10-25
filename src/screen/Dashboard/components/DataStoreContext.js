@@ -8,6 +8,17 @@ export const PlaygroundProvider = ({ children }) => {
 
   useEffect(() => {
     fetchFolders();
+    
+    // Refresh data when user returns to dashboard from playground
+    const handleFocus = () => {
+      fetchFolders();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const fetchFolders = async () => {

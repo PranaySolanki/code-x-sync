@@ -3,19 +3,12 @@ import React, { useEffect, useState, useRef} from 'react';
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from 'next/image';
-import supabase from "@/helper/supabaseClient";
+import supabase, { getSessionWithErrorHandling, handleAuthError } from "@/helper/supabaseClient";
 import { useRouter } from 'next/navigation';
 // Import your assets here. Make sure the paths are correct.
-import dashboardImg from '@/screen/LandingPage/assets/images/home/dashboard.png';
-// import googleLogo from '@/screen/LandingPage/assets/images/brand-logos/google.svg';
-// import microsoftLogo from '@/screen/LandingPage/assets/images/brand-logos/microsoft.svg';
-// import adobeLogo from '@/screen/LandingPage/assets/images/brand-logos/adobe.svg';
-// import airbnbLogo from '@/screen/LandingPage/assets/images/brand-logos/airbnb.svg';
-// import stripeLogo from '@/screen/LandingPage/assets/images/brand-logos/stripe.svg';
-import insightsImg from '@/screen/LandingPage/assets/images/home/insights.png';
-// import womenImg from '@/screen/LandingPage/assets/images/people/women.jpg';
-import manImg from '@/screen/LandingPage/assets/images/people/man.jpg';
-// import man2Img from '@/screen/LandingPage/assets/images/people/man2.jpg';
+import EditorPageImg from '@/screen/LandingPage/assets/images/home/editor.png';
+import DashboardPageImg from '@/screen/LandingPage/assets/images/home/dashboard.png';
+
 
 
 
@@ -136,9 +129,10 @@ const LandingPage = () => {
     useEffect(() => {
         const fetchAuthUser = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const { session, error } = await getSessionWithErrorHandling(router);
                 const user = session?.user;
-                if (!user) {
+                
+                if (!user || error) {
                     setCurrentUserName(null);
                     setCurrentUserAvatar(null); 
                     setIsUserMenuOpen(false);
@@ -162,16 +156,25 @@ const LandingPage = () => {
                 setCurrentUserName(finalName);
 
             } catch (err) {
-                console.error('Error fetching auth user:', err);
+                const wasHandled = await handleAuthError(err, router);
+                if (!wasHandled) {
+                    console.error('Error fetching auth user:', err);
+                }
             }
         };
 
         fetchAuthUser();
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-            fetchAuthUser();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_OUT') {
+                setCurrentUserName(null);
+                setCurrentUserAvatar(null);
+                setIsUserMenuOpen(false);
+            } else if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+                fetchAuthUser();
+            }
         });
         return () => subscription?.unsubscribe();
-    }, []);
+    }, [router]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -343,7 +346,7 @@ const LandingPage = () => {
                             </div>
                             <div className="reveal-up tw-relative tw-mt-8 tw-flex tw-w-full tw-place-content-center tw-place-items-center" id="dashboard-container">
                                 <div className="tw-relative tw-max-w-[80%] tw-overflow-hidden tw-rounded-xl tw-bg-transparent max-md:tw-max-w-full" id="dashboard">
-                                    <Image src={dashboardImg} alt="dashboard" className="tw-h-full tw-w-full tw-object-cover tw-opacity-90 max-lg:tw-object-contain" />
+                                    <Image src={EditorPageImg} alt="dashboard" className="tw-h-full tw-w-full tw-object-cover tw-opacity-90 max-lg:tw-object-contain" />
                                 </div>
                                 <div className="hero-img-bg-grad tw-absolute tw-left-[20%] tw-top-5 tw-h-[200px] tw-w-[200px]"></div>
                             </div>
@@ -467,7 +470,7 @@ const LandingPage = () => {
                         <div className="reveal-up tw-flex tw-min-h-[60vh] tw-place-content-center tw-place-items-center tw-gap-[10%] max-lg:tw-flex-col max-lg:tw-gap-10">
                             <div className="tw-flex">
                                 <div className="tw-max-h-[650px] tw-max-w-[850px] tw-overflow-hidden tw-rounded-lg tw-shadow-lg tw-shadow-[rgba(170,49,233,0.44021358543417366)]">
-                                    <Image src={insightsImg} alt="coding" className="tw-h-full tw-w-full tw-object-cover" />
+                                    <Image src={DashboardPageImg} alt="coding" className="tw-h-full tw-w-full tw-object-cover" />
                                 </div>
                             </div>
                             <div className="tw-mt-6 tw-flex tw-max-w-[450px] tw-flex-col tw-gap-4">
