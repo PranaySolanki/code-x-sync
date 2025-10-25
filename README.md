@@ -2,14 +2,24 @@
 
 CodeXSync is a full-stack, web-based development environment that enables multiple users to collaborate and code simultaneously in the same file with instant synchronization. Built with Next.js and Supabase Realtime, this project demonstrates expertise in operational transformation principles and scalable real-time state management.
 
+-----
+
+## 🚀 Live Demo
+
+Experience the project live at: **[https://code-x-sync.vercel.app](https://code-x-sync.vercel.app)**
+
+-----
+
 ## ✨ Features
 
-  * **Real-Time Key-to-Key Sync:** Utilizes an **Operational Transformation (OT)**-like approach by transmitting minimal content patches directly from the Monaco Editor model across the network. This eliminates typing lag and prevents conflicts during simultaneous editing.
+  * **Real-Time Key-to-Key Sync:** Utilizes an **Operational Transformation (OT)**-like approach by transmitting minimal content patches directly from the **Monaco Editor** model across the network. This eliminates typing lag and prevents conflicts during simultaneous editing.
   * **Initial State Consistency:** Implements a custom **Request/Response pattern** via **Supabase Broadcast** to ensure users who join or reload the page receive the absolute latest, unsaved code from active collaborators, prioritizing live work over static database records.
   * **Multi-Cursor Tracking:** Tracks and broadcasts collaborators' cursor positions for a true shared editing experience.
   * **Authentication & Authorization:** Secure user access control using Supabase Auth to ensure only authorized owners and team members can view or edit project files.
   * **File Persistence:** Code is saved to a PostgreSQL database (via Supabase) upon explicit user action ("Save Code" button).
   * **Code Execution:** Integrated API for running code in popular languages (Python, JavaScript, C, Java) and displaying output.
+
+-----
 
 ## 🚀 Key Technologies & Architectural Highlights
 
@@ -22,6 +32,8 @@ CodeXSync is a full-stack, web-based development environment that enables multip
 | **Conflict Resolution**| **Monaco's `applyEdits`** | Used to apply remote code patches, effectively managing low-latency conflict resolution without complex manual OT logic. |
 | **Tooling** | `useRef`, `useEffect` | Crucial React Hooks used to manage component lifecycle, suppress self-broadcasts, and prevent infinite update loops. |
 
+-----
+
 ## ⚙️ Setup and Installation
 
 Follow these steps to get CodeXSync running locally:
@@ -33,7 +45,7 @@ You must have Node.js (version 18+) and npm installed.
 ### 2\. Clone the Repository
 
 ```bash
-git clone [YOUR_REPOSITORY_URL]
+git clone https://github.com/PranaySolanki/code-x-sync.git
 cd code-x-sync
 ```
 
@@ -64,10 +76,12 @@ You need a Supabase project set up.
 To enable network access for collaboration testing, start the server:
 
 ```bash
-npm run dev 
+npm run dev
 ```
 
 The application will be available at `http://localhost:3000` and on your local network at `http://[YOUR_IP_ADDRESS]:3000`.
+
+-----
 
 ## 🤝 How to Test Collaboration
 
