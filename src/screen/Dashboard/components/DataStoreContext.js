@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
-import supabase from '../helper/supabaseClient';
+import React, { createContext, useState, useEffect, use } from 'react';
+import supabase from '@/helper/supabaseClient';
 
 export const PlaygroundContext = createContext();
 
@@ -32,7 +32,7 @@ export const PlaygroundProvider = ({ children }) => {
       const { data: projectsData, error: projectsError } = await supabase
         .from('Project-Table')
         .select('*')
-        .eq('owner_id', user.id);
+        .or(`owner_id.eq.${user.id},team_email.cs.{${user.email}}`);
 
       if (projectsError) throw projectsError;
 
@@ -47,6 +47,8 @@ export const PlaygroundProvider = ({ children }) => {
 
         foldersObj[project.project_id] = {
           title: project.project_name,
+          owner_id: project.owner_id,
+          sharedWith: project.team_email,
           playgrounds: files.reduce((acc, file) => {
             acc[file.file_id] = {
               title: file.file_name,
@@ -59,12 +61,12 @@ export const PlaygroundProvider = ({ children }) => {
 
       setFolders(foldersObj);
     } catch (error) {
-      console.error('Error fetching folders:', error);
+      console.log('Error fetching folders:', error);
     }
   };
 
   const deleteFolder = async (folderId) => {
-    if (confirm("Are you sure you want to delete this folder? All playgrounds will be deleted.")) {
+    if (confirm("Are you sure you want to delete this project? All files related to this project will be deleted.")) {
       try {
         // Delete all files first
         const { error: filesError } = await supabase
@@ -84,14 +86,14 @@ export const PlaygroundProvider = ({ children }) => {
 
         await fetchFolders();
       } catch (error) {
-        console.error('Error deleting folder:', error);
+        console.log('Error deleting folder:', error);
         alert('Failed to delete folder');
       }
     }
   };
 
   const deleteCard = async (folderId, cardId) => {
-    if (confirm("Are you sure you want to delete this playground?")) {
+    if (confirm("Are you sure you want to delete this file?")) {
       try {
         const { error } = await supabase
           .from('File-Table')
@@ -102,8 +104,8 @@ export const PlaygroundProvider = ({ children }) => {
 
         await fetchFolders();
       } catch (error) {
-        console.error('Error deleting playground:', error);
-        alert('Failed to delete playground');
+        console.log('Error deleting file:', error);
+        alert('Failed to delete file');
       }
     }
   };

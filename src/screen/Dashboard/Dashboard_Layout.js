@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
-import LeftComponent from './LeftComponent';
-import RightComponent from './RightComponent';
-import Modal from './Modal';
-import { ModalContext } from '../context/ModalContext';
+import LeftComponent from '@/screen/Dashboard/LeftComponent/LeftComponent';
+import RightComponent from '@/screen/Dashboard/Rightcomponent/RightComponent';
+import Modal from '@/screen/Dashboard/components/Create_file_dialog';
+import { ModalContext } from '@/screen/Dashboard/components/Dialog_box_state';
 
 const StyledHome = styled.div`
   width: 100%;

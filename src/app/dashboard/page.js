@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase, { getSessionWithErrorHandling, handleAuthError } from "@/helper/supabaseClient";
-import { ModalProvider } from '../../context/ModalContext';
-import { PlaygroundProvider } from '../../context/PlaygroundContext';
-import Home from '../../components/Home';
+import { ModalProvider } from '@/screen/Dashboard/components/Dialog_box_state';
+import { PlaygroundProvider } from '@/screen/Dashboard/components/DataStoreContext';
+import Home from '@/screen/Dashboard/Dashboard_Layout';
 
 const Dashboard = () => {
     const router = useRouter();

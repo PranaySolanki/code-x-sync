@@ -117,8 +117,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
 
         loadFileContent();
     }, [fileID, initialCode]);
-
-    // useEffect for Supabase channel remains the same...
     useEffect(() => {
         if (!fileID) return;
         // Define a unique channel name using the fileID (e.g., 'project:fileID')
@@ -133,7 +131,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 // Receive code change from another user
                 isUpdatingExternally.current = true;
                 const editor = editorRef.current;
-
                 if (editor) {
                     // APPLY THE CHANGE DIRECTLY TO THE MODEL
                     editor.getModel().applyEdits(payload.payload.changes,[]);
@@ -148,7 +145,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             (payload) => {
                 // A user has requested the current state.
                 const currentCode = editorRef.current?.getValue() || codeRef.current;
-
                 if (currentCode) {
                     // 💡 NEW STEP: Send the current code back to the entire channel
                     channel.send({
@@ -170,9 +166,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                  if (payload.payload.senderId === localClientIdRef.current) {
             return; // EXIT: Do not process this message
         }
-
                 const initialCode = payload.payload.code;
-
                 // Only update if the current local code is empty (or the default initial load)
                 if (editorRef.current && editorRef.current.getValue() === '') {
                     isUpdatingExternally.current = true;
@@ -182,7 +176,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     isUpdatingExternally.current = false;
                 }
             }
-
         );
         channel.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
@@ -194,7 +187,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     payload: { userId: localClientIdRef.current }
                 });
             }
-
         });
         return () => {
             // Unsubscribe and remove the channel when leaving the editor
@@ -203,12 +195,35 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 supabase.removeChannel(channelRef.current);
                 channelRef.current = null;
             }
-            
         };
     }, [fileID]);
 
     const handleEditorChanges = (editor) => {
         editorRef.current = editor;
+
+        // Use onDidChangeModelContent to get the list of changes (the "patches")
+        editor.onDidChangeModelContent((event) => {
+            // If the change came from an external source, do nothing and return.
+            if (isUpdatingExternally.current) return;
+            
+            // This is a local change. Get the full code for consistency, 
+            // but for a better system, you would send event.changes.
+            const newCode = editor.getValue(); 
+            codeRef.current = newCode;
+
+            // Broadcast the change event object itself for other clients to apply
+            if (channelRef.current) {
+                channelRef.current.send({
+                    type: 'broadcast',
+                    event: 'code-change',
+                    payload: { 
+                        changes: event.changes, // Send the specific changes
+                        code: newCode, // Send the full code as a fallback/check
+                        userId: localClientIdRef.current // Identify the sender
+                    }
+                });
+            }
+        });
     };
 
 
