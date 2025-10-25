@@ -35,6 +35,7 @@ const TabsContainer = styled.div`
 const Tab = styled.div`
     padding: 0.5rem 1rem;
     cursor: pointer;
+    color: black;
     font-weight: ${props => props.$active ? '700' : '400'};
     border-bottom: ${props => props.$active ? '3px solid #000' : 'none'};
     transition: all 0.3s ease;
