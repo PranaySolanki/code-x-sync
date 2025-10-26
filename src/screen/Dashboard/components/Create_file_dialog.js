@@ -11,42 +11,136 @@ const ModalOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 `;
 
 const ModalContent = styled.div`
-  background-color: white;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: 2rem;
-  border-radius: 8px;
-  width: 400px;
+  border-radius: 24px;
+  width: 450px;
   max-width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+  
+  // Decorative corner dots
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+  }
+
+  &::before {
+    top: 24px;
+    left: 24px;
+  }
+
+  &::after {
+    top: 24px;
+    right: 24px;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 `;
 
 const ModalHeader = styled.h2`
-  margin-bottom: 1rem;
-  color: black;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
 `;
 
 const ModalForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 `;
 
 const Input = styled.input`
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 14px 16px;
+  font-size: 0.95em;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #64748b;
+  }
+
+  &:focus {
+    border-color: #06b6d4;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08);
+  }
 `;
 
 const Select = styled.select`
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 14px 16px;
+  font-size: 0.95em;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+
+  &:focus {
+    border-color: #06b6d4;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08);
+  }
+
+  option {
+    background: rgba(15, 23, 42, 0.9);
+    color: #e2e8f0;
+  }
 `;
 
 const ButtonGroup = styled.div`
@@ -56,36 +150,71 @@ const ButtonGroup = styled.div`
 `;
 
 const Button = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 12px 24px;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
-  background-color: ${props => props.$save ? '#4a67c0ff' : '#6c757d'};
-  color: white;
+  font-size: 0.95em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  
+  ${props => props.$save ? `
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+    
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
+    }
+  ` : `
+    background: rgba(51, 65, 85, 0.5);
+    border: 1px solid rgba(71, 85, 105, 0.6);
+    color: #e2e8f0;
+    
+    &:hover {
+      background: rgba(51, 65, 85, 0.8);
+      border-color: rgba(100, 116, 139, 1);
+      transform: translateY(-2px);
+    }
+  `}
 
-  &:hover {
-    opacity: 0.8;
-  }
-    &:disabled {
+  &:disabled {
     cursor: not-allowed;
-    background-color: #ccc;
+    background: rgba(51, 65, 85, 0.3);
+    color: #64748b;
+    transform: none;
+    box-shadow: none;
   }
 `;
 
 const EmailList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 12px;
+  max-height: 200px;
+  overflow-y: auto;
 `;
 
 const EmailTag = styled.div`
-  background-color: #e0e0e0;
-  padding: 4px 8px;
-  border-radius: 16px;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  padding: 8px 12px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   width: fit-content;
+  color: #06b6d4;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(6, 182, 212, 0.2);
+    border-color: #06b6d4;
+  }
 `;
 
 const RemoveButton = styled.button`
@@ -94,20 +223,44 @@ const RemoveButton = styled.button`
   cursor: pointer;
   margin-left: 8px;
   font-weight: bold;
-  color: #555;
+  color: #06b6d4;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
 `;
 
 const InputContainer = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+  gap: 12px;
+  
   .addEmailBtn {
-    background-color: #4a67c0ff;
-    margin-left: 8px;
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+    white-space: nowrap;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
     }
-    .emailInput {
-      flex: 1;
-    }
+  }
+  
+  .emailInput {
+    flex: 1;
+  }
 `;
 
 
