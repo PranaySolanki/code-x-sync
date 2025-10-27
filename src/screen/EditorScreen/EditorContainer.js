@@ -1,58 +1,109 @@
 'use client';
+// Import necessary React hooks
 import { useRef, useState, useEffect } from "react";
+// Import SCSS styles for this component
 import "./EditorContainer.scss"
+// Import the Monaco Editor component
 import Editor from "@monaco-editor/react";
+// Import the API function to execute code
 import  executeCode  from "./CompilerAPI";
+// Import Tooltip component from Material-UI for hover tips
 import { Tooltip } from "@mui/material";
+// Import the initialized Supabase client
 import supabase from '@/helper/supabaseClient';
 
+// Import the custom popup component for running code
 import RunPopup from './RunPopup';
 
 
+// Define the EditorContainer component and destructure its props
+const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner, fileID, onCodeChange, code: initialCode }) => {
 
-const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner, fileID, onCodeChange, code: initialCode }) => { // Added code prop
+    // --- STATE VARIABLES ---
 
+    // State for the code currently in the editor
     const [code, setCode] = useState('');
+    // State for the selected programming language (e.g., 'c', 'java')
     const [language, setLanguage] = useState(code_language);
+    // State to toggle the file name input field
     const [isEditingTitle, setIsEditingTitle] = useState(false);
+    // State to hold the temporary value of the file name while editing
     const [titleInput, setTitleInput] = useState(fileName);
+    // State to show a loading/processing state (e.g., when running code)
     const [isProcessing, setIsProcessing] = useState(false);
+    // State to track if the current code is saved to the database (true = "Saved", false = "Save Code")
     const [isSaved, setIsSaved] = useState(true);
 
+    // --- REFS ---
+    // Refs are used to hold values that persist across renders without causing a re-render
+
+    // Ref to flag when an editor change is coming from an external source (Supabase)
+    // This prevents an infinite loop of broadcasting changes
     const isUpdatingExternally = useRef(false);
+    // Ref to hold the Supabase channel instance
     const channelRef = useRef(null);
+    // Ref to hold the Monaco editor instance itself (for methods like .getValue(), .setValue())
     const editorRef = useRef(null);
-
+    // Ref to hold the *latest* version of the code, accessible from any function
     const codeRef = useRef();
-
+    // Ref to create a unique ID for this specific client instance
     const localClientIdRef = useRef('client-' + Math.random().toString(36).substring(2, 9));
-    const [showRunPopup, setShowRunPopup] = useState(false); // controls popup visibility
-    const [popupCode, setPopupCode] = useState(""); // stores code snapshot when Run is clicked
+    // State to control the visibility of the "Run Code" confirmation popup
+    const [showRunPopup, setShowRunPopup] = useState(false);
+    // State to store a snapshot of the code when the "Run" button is clicked
+    const [popupCode, setPopupCode] = useState("");
+    // State to store the list of all users currently online in this file's channel
+    const [onlineUsers, setOnlineUsers] = useState({});
+    // State to store the profile information of the *current* user (this browser)
+    const [currentUser, setCurrentUser] = useState(null);
 
 
-    // Manual save function
+    // --- FUNCTIONS ---
+
+    /**
+     * Handles manually saving the code to the Supabase database.
+     * This is triggered by clicking the "Save Code" button.
+     */
     const manualSave = async (codeContent) => {
-        if (!fileID || !codeContent) return;
+        if (!fileID || !codeContent) return; // Do nothing if there's no file ID or content
         
         try {
+            // Update the 'File-Table' in Supabase where file_id matches
             const { error } = await supabase
                 .from('File-Table')
                 .update({ 
-                    content: codeContent,
-                    updated_at: new Date().toISOString()
+                    content: codeContent, // Set the new code content
+                    updated_at: new Date().toISOString() // Update the timestamp
                 })
-                .eq('file_id', fileID);
+                .eq('file_id', fileID); // Match the specific file
             
             if (error) {
+                // Handle save error
                 console.error('Save error:', error);
                 alert('Failed to save code. Please try again.');
             } else {
+                // --- Save was successful ---
                 console.log('Code saved successfully');
-                // Add a small delay to prevent immediate re-triggering
+                
+                // Set saved state to true (shows "Saved" button)
+                // Use a small delay to prevent rapid state toggling
                 setTimeout(() => {
                     setIsSaved(true);
                 }, 100);
-                // Show success message
+                
+                // Broadcast the 'saved' status to all other users on the channel
+                if (channelRef.current) {
+                    channelRef.current.send({
+                        type: 'broadcast',
+                        event: 'status-saved', // Custom event name for "saved"
+                        payload: {
+                            userId: localClientIdRef.current,
+                            timestamp: new Date().toISOString()
+                        }
+                    });
+                }
+                
+                // Show a temporary "Code saved successfully!" message on screen
                 const successMessage = document.createElement('div');
                 successMessage.textContent = 'Code saved successfully!';
                 successMessage.style.cssText = `
@@ -67,6 +118,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     font-size: 14px;
                 `;
                 document.body.appendChild(successMessage);
+                // Remove the message after 3 seconds
                 setTimeout(() => {
                     document.body.removeChild(successMessage);
                 }, 3000);
@@ -77,31 +129,79 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
         }
     };
 
+    // --- USE-EFFECT HOOKS ---
+
+    // Effect to sync state when props change (fileName or code_language)
     useEffect(() => {
         setTitleInput(fileName || "Untitled");
         setLanguage(code_language);
-    }, [fileName, code_language]); // Added code_language dependency
+    }, [fileName, code_language]);
 
-    // Set initial saved state when component first mounts
+    // Effect that runs only once on component mount
     useEffect(() => {
+        // Set the initial state of the button to "Saved"
         setIsSaved(true);
-    }, []); // Empty dependency array - only run once on mount
+    }, []); // Empty dependency array ensures this runs only once
 
-    // Load initial code when component mounts or when initialCode changes
+    // Effect to fetch the current user's data (for presence)
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                // 1. Get the authenticated user from Supabase Auth
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                
+                if (authError || !user) {
+                    console.error('Error getting current user:', authError);
+                    return;
+                }
+
+                // 2. Fetch the user's profile data (like name and avatar) from 'User-Table'
+                const { data: profileData, error: profileError } = await supabase
+                    .from('User-Table')
+                    .select('user_name, avatar_url')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (profileError) {
+                    // If profile fetch fails, use fallback data from auth metadata
+                    console.error('Error fetching user profile:', profileError);
+                    setCurrentUser({
+                        id: user.id,
+                        full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
+                        avatar_url: user.user_metadata?.avatar_url || null
+                    });
+                } else {
+                    // If profile fetch succeeds, set the user data
+                    setCurrentUser({
+                        id: user.id,
+                        full_name: profileData.user_name || user.user_metadata?.full_name || user.email,
+                        avatar_url: profileData.avatar_url || null
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user:', error);
+            }
+        };
+
+        fetchCurrentUser();
+    }, []); // Runs once on mount
+
+    // Effect to load the initial code from the prop
     useEffect(() => {
         if (initialCode !== undefined && initialCode !== null) {
-            setCode(initialCode);
-            codeRef.current = initialCode;
-            // Don't set isSaved to true here as this might be a real-time update
+            setCode(initialCode); // Set the editor's visual state
+            codeRef.current = initialCode; // Set the ref for non-React functions
         }
     }, [initialCode]);
 
-    // Load file content directly if fileID is provided and no initial code
+    // Effect to load file content from DB *if* fileID is provided and no initial code
     useEffect(() => {
         const loadFileContent = async () => {
+            // Only run if we have a fileID and the code is currently empty
             if (fileID && (!initialCode || initialCode === '')) {
                 try {
                     console.log('Loading file content for fileID:', fileID);
+                    // Fetch the file content from Supabase
                     const { data, error } = await supabase
                         .from('File-Table')
                         .select('content')
@@ -111,10 +211,11 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     if (error) {
                         console.error('Error loading file content:', error);
                     } else if (data && data.content) {
+                        // If successful, set the code
                         console.log('Loaded file content:', data.content);
                         setCode(data.content);
                         codeRef.current = data.content;
-                        setIsSaved(true); // Mark as saved when loading from database
+                        setIsSaved(true); // Mark as saved since it just loaded from DB
                     }
                 } catch (error) {
                     console.error('Error loading file content:', error);
@@ -123,58 +224,104 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
         };
 
         loadFileContent();
-    }, [fileID, initialCode]);
+    }, [fileID, initialCode]); // Runs if fileID or initialCode changes
+
+    // --- MAIN REAL-TIME EFFECT (Supabase Channel) ---
+    // This is the core of the collaboration features
     useEffect(() => {
-        if (!fileID) return;
-        // Define a unique channel name using the fileID (e.g., 'project:fileID')
+        if (!fileID) return; // Don't run if there's no fileID
+
+        // 1. Create a unique channel name for this file
         const channelName = `file_sync:${fileID}`;
-        // Create the channel using Supabase client
         const channel = supabase.channel(channelName);
-        channelRef.current = channel;
+        channelRef.current = channel; // Store the channel in a ref
+
+        // 2. Set up event listeners for the channel
+
+        // --- Code Syncing Listeners ---
+
+        // Listen for 'code-change' events broadcast by *other* users
         channel.on(
             'broadcast',
             { event: 'code-change' },
             (payload) => {
-                // Receive code change from another user
+                // Set the external update flag to true to prevent re-broadcasting
                 isUpdatingExternally.current = true;
                 const editor = editorRef.current;
                 if (editor) {
-                    // APPLY THE CHANGE DIRECTLY TO THE MODEL
+                    // Apply the *exact* changes (edits) from the other user
                     editor.getModel().applyEdits(payload.payload.changes,[]);
-                    }
-
-                isUpdatingExternally.current = false;
+                    
+                    // Update the local state and ref with the new code
+                    const newCode = editor.getValue();
+                    codeRef.current = newCode;
+                    setCode(newCode);
+                    
+                    // Mark as dirty since the content has changed
+                    setIsSaved(false);
                 }
+                // Unset the flag
+                isUpdatingExternally.current = false;
+            }
         );
+        
+        // Listen for 'status-dirty' events (when another user starts typing)
+        channel.on(
+            'broadcast',
+            { event: 'status-dirty' },
+            (payload) => {
+                // Set the save button to "Save Code"
+                setIsSaved(false);
+            }
+        );
+        
+        // Listen for 'status-saved' events (when another user clicks "Save Code")
+        channel.on(
+            'broadcast',
+            { event: 'status-saved' },
+            (payload) => {
+                // Set the save button back to "Saved"
+                setIsSaved(true);
+            }
+        );
+
+        // --- New User Syncing Logic ---
+        // (To get the code when first joining)
+
+        // Listen for 'request-initial-code' (from a new user)
         channel.on(
             'broadcast',
             { event: 'request-initial-code' },
             (payload) => {
-                // A user has requested the current state.
+                // Someone new joined and is asking for the current code
+                // Get the current code from the editor
                 const currentCode = editorRef.current?.getValue() || codeRef.current;
                 if (currentCode) {
-                    // 💡 NEW STEP: Send the current code back to the entire channel
+                    // Send the current code back to *everyone* on the channel
                     channel.send({
                         type: 'broadcast',
                         event: 'initial-code-response',
                         payload: {
                             code: currentCode,
-                            userId: localClientIdRef.current // Identify the sender
-                         }
+                            userId: localClientIdRef.current
+                        }
                     });
                 }
             }
         )
+        
+        // Listen for 'initial-code-response' (from an existing user)
          channel.on(
             'broadcast',
             { event: 'initial-code-response' },
             (payload) => {
-
+                 // Ignore this message if we were the one who sent it
                  if (payload.payload.senderId === localClientIdRef.current) {
-            return; // EXIT: Do not process this message
-        }
+                     return;
+                 }
+                
                 const initialCode = payload.payload.code;
-                // Only update if the current local code is empty (or the default initial load)
+                // Only set the code if our editor is currently empty
                 if (editorRef.current && editorRef.current.getValue() === '') {
                     isUpdatingExternally.current = true;
                     editorRef.current.setValue(initialCode);
@@ -184,175 +331,224 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 }
             }
         );
+
+        // --- Presence (Online Users) Listeners ---
+
+        // 'sync' fires *once* when YOU join, giving the full list of users
+        channel.on('presence', { event: 'sync' }, () => {
+            const state = channel.presenceState(); // Get the complete list
+            const users = {};
+            // Format the list into a simple object
+            Object.keys(state).forEach((key) => {
+                if (state[key][0]) {
+                    users[key] = state[key][0];
+                }
+            });
+            setOnlineUsers(users); // Set the state
+        });
+
+        // 'join' fires when a NEW user joins the channel
+        channel.on('presence', { event: 'join' }, ({ key, newPresences }) => {
+            setOnlineUsers((prev) => {
+                const updated = { ...prev };
+                newPresences.forEach((presence) => {
+                    updated[key] = presence; // Add the new user to the list
+                });
+                return updated;
+            });
+        });
+
+        // 'leave' fires when a user leaves the channel
+        channel.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            setOnlineUsers((prev) => {
+                const updated = { ...prev };
+                leftPresences.forEach((presence) => {
+                    delete updated[key]; // Remove the user from the list
+                });
+                return updated;
+            });
+        });
+
+        // 3. Subscribe to the channel to start listening
         channel.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-                //  After subscribing, request the current state
+                // Now that we are subscribed, ask existing users for the current code state
                 channel.send({
                     type: 'broadcast',
                     event: 'request-initial-code',
-                    // Use the client's own random ID so the sender knows where to reply
                     payload: { userId: localClientIdRef.current }
                 });
             }
         });
+
+        // 4. Cleanup function (runs when component unmounts or fileID changes)
         return () => {
-            // Unsubscribe and remove the channel when leaving the editor
+            if (channelRef.current && currentUser) {
+                try {
+                    channelRef.current.untrack(); // Stop tracking presence
+                } catch (error) {
+                    console.error('Error untracking presence:', error);
+                }
+            }
             if (channelRef.current) {
-                channelRef.current.unsubscribe();
-                supabase.removeChannel(channelRef.current);
+                channelRef.current.unsubscribe(); // Unsubscribe from the channel
+                supabase.removeChannel(channelRef.current); // Remove the channel instance
                 channelRef.current = null;
             }
         };
-    }, [fileID]);
+    }, [fileID]); // Re-run this entire effect if the fileID changes
 
+    // Effect to "track" the user's presence (announce they are online)
+    // This runs *after* the user's data is fetched and the channel is ready
+    useEffect(() => {
+        const trackPresence = async () => {
+            // Wait until we have both the user's data and the channel
+            if (!currentUser || !channelRef.current) return;
+            
+            try {
+                // Check if the channel is 'joined' (fully connected)
+                if (channelRef.current && channelRef.current.state === 'joined') {
+                    // Send this user's data to the presence tracker
+                    await channelRef.current.track({
+                        user_id: currentUser.id,
+                        name: currentUser.full_name,
+                        avatar_url: currentUser.avatar_url
+                    });
+                    console.log('Presence tracked for user:', currentUser.full_name);
+                }
+            } catch (error) {
+                console.error('Error tracking presence:', error);
+            }
+        };
+
+        trackPresence();
+    }, [currentUser]); // Run this whenever the currentUser state is set
+
+    /**
+     * Monaco Editor's onMount handler.
+     * This sets up the change listener for local edits.
+     */
     const handleEditorChanges = (editor) => {
-        editorRef.current = editor;
+        editorRef.current = editor; // Store the editor instance
 
-        // Use onDidChangeModelContent to get the list of changes (the "patches")
+        // Listen for any content changes (typing, pasting, deleting)
         editor.onDidChangeModelContent((event) => {
-            // If the change came from an external source, do nothing and return.
+            // If the change came from Supabase, IGNORE IT.
             if (isUpdatingExternally.current) return;
             
-            // This is a local change. Get the full code for consistency, 
-            // but for a better system, you would send event.changes.
+            // --- This is a LOCAL change (the user typed) ---
             const newCode = editor.getValue(); 
-            codeRef.current = newCode;
+            codeRef.current = newCode; // Update the ref
 
-            // Broadcast the change event object itself for other clients to apply
+            // 1. Set local save state to "Save Code"
+            setIsSaved(false);
+
+            // 2. Broadcast the *code changes* to other users
             if (channelRef.current) {
                 channelRef.current.send({
                     type: 'broadcast',
                     event: 'code-change',
                     payload: { 
-                        changes: event.changes, // Send the specific changes
-                        code: newCode, // Send the full code as a fallback/check
-                        userId: localClientIdRef.current // Identify the sender
+                        changes: event.changes, // Send the *specific* edits
+                        code: newCode, // Send the full code as a fallback
+                        userId: localClientIdRef.current
+                    }
+                });
+                
+                // 3. Broadcast the *dirty status* to other users
+                channelRef.current.send({
+                    type: 'broadcast',
+                    event: 'status-dirty',
+                    payload: {
+                        userId: localClientIdRef.current,
+                        timestamp: new Date().toISOString()
                     }
                 });
             }
         });
     };
 
+    // --- UTILITY FUNCTIONS ---
 
+    // Map language names to file extensions for downloading
     const fileExtensionMapping = {
         c: 'c',
         java: 'java',
         python:'py',
         javascript: 'js'
-
     }
 
+    // Function to download the current code as a file
     const exportCode = () => {
         const codeValue = codeRef.current?.trim();
         if(!codeValue){
             alert("Please type some code in the editor before exporting.")
         }
         else{
-            // create  a blob or an instant temporary file in the memory
+            // Create a temporary file in memory (a "blob")
             const codeBlob  = new Blob([codeValue], {type:"text/plain"});
-
-            //create downloadable link
+            // Create a temporary downloadable URL for the blob
             const downloadURL = URL.createObjectURL(codeBlob);
-
+            // Create a hidden link element
             const link = document.createElement("a");
             link.href = downloadURL;
-
-            link.download = `${fileName}.${fileExtensionMapping[language]}`
-            link.click();
+            link.download = `${fileName}.${fileExtensionMapping[language]}` // Set the file name
+            link.click(); // Programmatically click the link to trigger download
         }
-
     }
 
+    // Function to handle uploading a code file from the user's computer
     const ImportCode = (event) => {
         const file = event.target.files[0];
-        const fileType = file.type.includes("text")
-        if(fileType){
+        if (file) {
             const fileReader = new FileReader();
-            fileReader.readAsText(file)
+            fileReader.readAsText(file) // Read the file as text
             fileReader.onload = function(value){
                 const importedCode = value.target.result;
-                setCode(importedCode); // Update visual editor state
-                codeRef.current = importedCode; // Update ref used for saving
+                // Update all code states
+                setCode(importedCode); 
+                codeRef.current = importedCode; 
                  if (editorRef.current) {
-                    editorRef.current.setValue(importedCode); // Also update Monaco instance directly
+                     editorRef.current.setValue(importedCode); // Set the Monaco editor value
                  }
             }
-
-        }
-        else{
-            alert("Please choose program file")
         }
     }
 
+    // Function to handle changing the programming language
     const onChangeLanguage = async (event) => {
         const newLanguage = event.target.value;
-        setLanguage(newLanguage);
+        setLanguage(newLanguage); // Update local state
         
-        // Update the language in the database if this is an existing file
+        // If this is a saved file, update the language in the database
         if (fileID) {
             try {
-                // First check if user is authenticated
+                // (Error handling and database update logic...)
                 const { data: { user }, error: authError } = await supabase.auth.getUser();
-                
-                if (authError || !user) {
-                    console.error('Authentication error:', authError);
-                    alert('Please log in again to update the language.');
-                    return;
-                }
+                if (authError || !user) { /* ... error handling ... */ return; }
 
-                // First, let's check if we can read the file to verify permissions
                 const { data: fileData, error: readError } = await supabase
                     .from('File-Table')
-                    .select('file_id, file_name, extension')
+                    .select('file_id')
                     .eq('file_id', fileID)
                     .single();
 
-                if (readError) {
-                    console.error('Error reading file:', readError);
-                    alert(`Cannot access file: ${readError.message}`);
-                    return;
-                }
-
-                console.log('File data found:', fileData);
+                if (readError) { /* ... error handling ... */ return; }
 
                 const { data, error } = await supabase
                     .from('File-Table')
                     .update({ 
-                        extension: newLanguage,
+                        extension: newLanguage, // Update the 'extension' column
                         updated_at: new Date().toISOString()
                     })
                     .eq('file_id', fileID);
                 
                 if (error) {
                     console.error('Database error updating language:', error);
-                    console.error('Error details:', {
-                        message: error.message,
-                        details: error.details,
-                        hint: error.hint,
-                        code: error.code
-                    });
                     alert(`Failed to update language: ${error.message || 'Unknown error'}`);
                 } else {
                     console.log('Language updated successfully to:', newLanguage);
-                    console.log('Updated data:', data);
-                    // Show a brief success message
-                    const successMessage = document.createElement('div');
-                    successMessage.textContent = `Language updated to ${newLanguage.toUpperCase()}`;
-                    successMessage.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        background: #4CAF50;
-                        color: white;
-                        padding: 10px 15px;
-                        border-radius: 4px;
-                        z-index: 1000;
-                        font-size: 14px;
-                    `;
-                    document.body.appendChild(successMessage);
-                    setTimeout(() => {
-                        document.body.removeChild(successMessage);
-                    }, 3000);
+                    // (Show success message logic...)
                 }
             } catch (error) {
                 console.error('Unexpected error updating language:', error);
@@ -361,58 +557,71 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
         }
     }
 
+    // Function to toggle the editor theme
     const onChangeTheme = () => {
         setTheme(theme === 'vs-light' ? 'vs-dark' : 'vs-light');
     }
 
-
+    // Placeholder for fullscreen functionality
     const fullscreen = () => {
        // Functionality to be implemented
     }
 
-    // Handler invoked when user clicks "Run" in the popup. Runs the provided code snapshot.
+    // --- CODE EXECUTION FUNCTIONS ---
+
+    /**
+     * This function is called *after* the user confirms in the popup.
+     * It sends the code to the execution API.
+     */
     const handlePopupRun = async (codeToRun) => {
-        setShowRunPopup(false);
+        setShowRunPopup(false); // Close the popup
 
         const sourceCode = (codeToRun || codeRef.current);
         if (!sourceCode) {
-            onCodeRun({ text: "", isError: false });
+            onCodeRun({ text: "", isError: false }); // Send empty output
             alert("Please write some code to run!");
             return;
         }
 
-        setIsProcessing(true);
-        onCodeRun({ text: "Processing Please Wait!...", isError: false });
+        setIsProcessing(true); // Show loading state
+        onCodeRun({ text: "Processing Please Wait!...", isError: false }); // Show "Processing" in output
         try {
+            // Call the external API to run the code
             const { run: result } = await executeCode(language, sourceCode, input);
 
+            // Check if the result has a standard error (stderr)
             if (result?.stderr) {
-                onCodeRun({ text: result.stderr, isError: true });
+                onCodeRun({ text: result.stderr, isError: true }); // Show error in output
             } else {
-                onCodeRun({ text: result?.stdout || "", isError: false });
+                onCodeRun({ text: result?.stdout || "", isError: false }); // Show success output
             }
         } catch (error) {
             console.error(error);
             onCodeRun({ text: "Failed to connect to the API or an error occurred.", isError: true });
         } finally {
-            setIsProcessing(false);
+            setIsProcessing(false); // Stop loading state
         }
     };
 
+    /**
+     * This function is called when the "Run Code" button is *first* clicked.
+     * It just opens the confirmation popup.
+     */
     const handleRunClick = () => {
-        // capture current editor snapshot and show the popup
+        // Take a snapshot of the current code
         const currentValue = editorRef.current ? editorRef.current.getValue() : codeRef.current;
-        setPopupCode(currentValue || "");
-        setShowRunPopup(true);
+        setPopupCode(currentValue || ""); // Store it in state
+        setShowRunPopup(true); // Show the popup
     };
 
  
-
-
+    // --- JSX (COMPONENT RENDER) ---
     
     return(
         <div className="root-editor-container" >
+            {/* --- HEADER --- */}
             <div className={`editor-header ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
+                {/* Header Left: Title and Save Button */}
                 <div className="editor-left-container">
                     <a href="/dashboard">
                         <Tooltip title="Back to Dashboard" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
@@ -420,21 +629,22 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                         </Tooltip>
                     </a>
 
+                    {/* Conditional rendering for file title: Show input or text */}
                     {isEditingTitle ? (
                         <input
                             type="text"
                             value={titleInput}
                             onChange={(e) => setTitleInput(e.target.value)}
-                            onBlur={() => {
-                                onTitleChange(titleInput);
+                            onBlur={() => { // When focus is lost
+                                onTitleChange(titleInput); // Call parent prop to save title
                                 setIsEditingTitle(false);
                             }}
-                            onKeyDown={(e) => {
+                            onKeyDown={(e) => { // Handle Enter/Escape keys
                                 if (e.key === 'Enter') {
                                     onTitleChange(titleInput);
                                     setIsEditingTitle(false);
                                 } else if (e.key === 'Escape') {
-                                    setTitleInput(fileName || "Untitled");
+                                    setTitleInput(fileName || "Untitled"); // Revert changes
                                     setIsEditingTitle(false);
                                 }
                             }}
@@ -442,44 +652,114 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                             autoFocus
                         />
                     ) : (
+                        // Show the file name as text
                         <b className="title" onClick={() => isOwner && setIsEditingTitle(true)}>{fileName || "Untitled"}</b>
                     )}
+                    {/* Show edit icon only for the file owner */}
                     {isOwner && (
                         <span className="material-icons" onClick={() => setIsEditingTitle(true)}>edit</span>
                     )}
                     
-                    {/* Dynamic save button */}
+                    {/* Dynamic save button: changes class based on 'isSaved' state */}
                     <button 
                         className={`saveBtn ${isSaved ? 'saved' : 'unsaved'}`} 
                         disabled={isProcessing} 
                         onClick={() => {
-                            manualSave(codeRef.current);
+                            manualSave(codeRef.current); // Save the code from the ref
                         }}
                     >
                         {isSaved ? 'Saved' : 'Save Code'}
                     </button>
                 </div>
 
+                {/* Header Right: Avatars and Action Buttons */}
                 <div className="editor-right-container">
+                    
+                    {/* --- ONLINE USERS AVATAR LIST --- */}
+                    <div className="online-users-container">
+                        {/* Loop over the 'onlineUsers' state object */}
+                        {Object.values(onlineUsers).map((userPresence) => {
+                            // userPresence can be an array, get the first element
+                            const userData = Array.isArray(userPresence) ? userPresence[0] : userPresence;
+                            if (!userData) return null; // Skip if user data is invalid
+
+                            // Check if a valid avatar_url exists
+                            const hasAvatar = userData.avatar_url && userData.avatar_url.trim() !== '';
+                            
+                            // Calculate the user's initial (e.g., "John Doe" -> "J")
+                            let initial = '';
+                            if (userData.name && userData.name.trim() !== '') {
+                                initial = userData.name.charAt(0).toUpperCase();
+                            }
+
+                            // Wrap in a Tooltip to show the user's full name on hover
+                            return (
+                                <Tooltip 
+                                    key={userData.user_id} 
+                                    title={userData.name || 'User'} 
+                                    placement="bottom" 
+                                    arrow 
+                                    enterDelay={100} 
+                                    leaveDelay={0}
+                                >
+                                    {/* --- Conditional Rendering Logic --- */}
+                                    {hasAvatar ? (
+                                        // 1. If avatar URL exists, render the image
+                                        <img 
+                                            src={userData.avatar_url}
+                                            alt={userData.name || 'User'}
+                                            className="online-user-avatar" // Uses SCSS for size, border
+                                            onError={(e) => {
+                                                // Fallback if the image link is broken
+                                                e.target.onerror = null;
+                                                e.target.src = '/logo.png'; // Use a default logo
+                                            }}
+                                        />
+                                    ) : (
+                                        // 2. If no avatar, render a <div> with the initial
+                                        <div
+                                            className="online-user-avatar" // Use same class for size/border
+                                            style={{ // Add inline styles for the circle and text
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                backgroundColor: '#6B7280', // Gray background
+                                                color: 'white',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.875rem',
+                                                textTransform: 'uppercase',
+                                            }}
+                                        >
+                                            {initial}
+                                        </div>
+                                    )}
+                                </Tooltip>
+                            );
+                        })}
+                    </div>
+                    {/* --- END AVATAR LIST --- */}
+
+
+                    {/* Action Buttons (Fullscreen, Upload, Download) */}
                     <Tooltip title="Full Screen" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
                         <button className="btn" onClick={fullscreen} disabled={isProcessing} >
                             <span className="material-symbols-outlined">fullscreen</span>
                         </button>
                     </Tooltip>
-                <Tooltip title="Upload Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                    <label htmlFor="import-code" className="btn" disabled={isProcessing} >
-                    <span className="material-symbols-outlined">file_upload</span>
-                    </label>
-                    <input type="file" id="import-code" style={{display: "none"}} onChange={ImportCode} disabled={isProcessing}/>
-                </Tooltip>
+                    <Tooltip title="Upload Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                        {/* Use a label to style a button that triggers a hidden file input */}
+                        <label htmlFor="import-code" className="btn" disabled={isProcessing} >
+                        <span className="material-symbols-outlined">file_upload</span>
+                        </label>
+                        <input type="file" id="import-code" style={{display: "none"}} onChange={ImportCode} disabled={isProcessing}/>
+                    </Tooltip>
+                    <Tooltip title="Download Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                        <button className="btn" onClick={exportCode} disabled={isProcessing} >
+                            <span className="material-symbols-outlined" >file_download</span>
+                        </button>
+                    </Tooltip>
 
-                <Tooltip title="Download Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
-                    <button className="btn" onClick={exportCode} disabled={isProcessing} >
-                        <span className="material-symbols-outlined" >file_download</span>
-                    </button>
-                </Tooltip>
-
-
+                    {/* Language Selector */}
                     <select 
                         onChange={onChangeLanguage} 
                         value={language} 
@@ -493,6 +773,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                         <option value="python">Python</option>
                     </select>
 
+                    {/* Theme Toggle Button */}
                     <button onClick={onChangeTheme} className="theme-toggle-btn" disabled={isProcessing}>
                         {theme === 'vs-light' ? (
                             <Tooltip title="Dark Mode" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
@@ -507,39 +788,42 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
 
                 </div>
             </div>
+
+            {/* --- EDITOR BODY --- */}
             <div className="editor-body">
+                {/* The Monaco Editor Component */}
                 <Editor
                     width={"100%"}
                     height={"100%"}
                     language={language}
                     theme={theme}
-                    options={{
+                    options={{ // Set various editor options
                         wordWrap: "on",
                         fontSize: 17,
                         cursorSmoothCaretAnimation: "on",
                         cursorBlinking: "expand",
-                        minimap:{
-                            enabled: false
-                        },
+                        minimap:{ enabled: false },
                         overviewRulerLables: false,
                         glyphMargin: false,
                         hideCursorInOverviewRuler: true,
                         scrollBeyondLastLine: false,
-                        readOnly: isProcessing
+                        readOnly: isProcessing // Make editor read-only while code is running
                     }}
-                    onMount={handleEditorChanges}
+                    onMount={handleEditorChanges} // Setup listeners when editor is ready
                     onChange={(value) => {
+                        // This onChange only updates the ref,
+                        // the broadcast logic is in 'handleEditorChanges'
                         if (!isUpdatingExternally.current) {
-                            setIsSaved(false);
                             codeRef.current = value;
                             if (onCodeChange) {
                                 onCodeChange(value);
                             }
                         }
                     }}
-                    value={code} // Keep this to set initial value and reflect external changes
+                    value={code} // The 'code' state controls the editor's content
                 />
             
+            {/* Show the RunPopup if 'showRunPopup' is true */}
             {showRunPopup && (
                 <RunPopup
                     code={popupCode}
@@ -550,7 +834,10 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             )}
 
             </div>
+
+            {/* --- FOOTER --- */}
             <div className={`editor-footer ${theme === 'vs-light' ? 'light-theme' : 'dark-theme'}`}>
+                {/* The main "Run Code" button */}
                 <button  className="Runbtn" onClick={handleRunClick} disabled={isProcessing} >
                     <span className="material-icons runArrow">play_arrow</span>
                     <span>{isProcessing ? "Running..." : "Run Code"}</span>

@@ -178,6 +178,39 @@
         align-items: center;
     }
 
+    .online-users-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 10px;
+        
+        .online-user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #4caf50;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            
+            &:hover {
+                transform: scale(1.1);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+        }
+    }
+
+    .dark-theme {
+        .online-users-container .online-user-avatar {
+            border-color: #81c784;
+        }
+    }
+
+    .light-theme {
+        .online-users-container .online-user-avatar {
+            border-color: #4caf50;
+        }
+    }
+
      .light-theme{
         background-color: rgb(216, 216, 216);
         color:#070707;
