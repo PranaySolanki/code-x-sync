@@ -5,6 +5,7 @@ import { ModalContext } from './Dialog_box_state';
 import { PlaygroundContext } from './DataStoreContext';
 import supabase from '../../../helper/supabaseClient';
 
+
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
