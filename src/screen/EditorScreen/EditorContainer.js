@@ -495,6 +495,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     }
                 });
             }
+            setItsMyFirstTime(false);
         });
     };
 
