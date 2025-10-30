@@ -20,7 +20,7 @@ import RunPopup from './RunPopup';
 const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleChange, code_language, isOwner, fileID, onCodeChange, code: initialCode }) => {
 
     // --- STATE VARIABLES ---
-
+    const FileID = fileID;
     // State for the code currently in the editor
     const [code, setCode] = useState('');
     // State for the selected programming language (e.g., 'c', 'java')
@@ -57,6 +57,8 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     // State to store the profile information of the *current* user (this browser)
     const [currentUser, setCurrentUser] = useState(null);
 
+    const [liveUserCount , setliveUserCount] = useState(null);
+
 
     // --- FUNCTIONS ---
 
@@ -83,7 +85,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 alert('Failed to save code. Please try again.');
             } else {
                 // --- Save was successful ---
-                console.log('Code saved successfully');
                 
                 // Set saved state to true (shows "Saved" button)
                 // Use a small delay to prevent rapid state toggling
@@ -187,44 +188,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     }, []); // Runs once on mount
 
     // Effect to load the initial code from the prop
-    useEffect(() => {
-        if (initialCode !== undefined && initialCode !== null) {
-            setCode(initialCode); // Set the editor's visual state
-            codeRef.current = initialCode; // Set the ref for non-React functions
-        }
-    }, [initialCode]);
-
-    // Effect to load file content from DB *if* fileID is provided and no initial code
-    useEffect(() => {
-        const loadFileContent = async () => {
-            // Only run if we have a fileID and the code is currently empty
-            if (fileID && (!initialCode || initialCode === '')) {
-                try {
-                    console.log('Loading file content for fileID:', fileID);
-                    // Fetch the file content from Supabase
-                    const { data, error } = await supabase
-                        .from('File-Table')
-                        .select('content')
-                        .eq('file_id', fileID)
-                        .single();
-                    
-                    if (error) {
-                        console.error('Error loading file content:', error);
-                    } else if (data && data.content) {
-                        // If successful, set the code
-                        console.log('Loaded file content:', data.content);
-                        setCode(data.content);
-                        codeRef.current = data.content;
-                        setIsSaved(true); // Mark as saved since it just loaded from DB
-                    }
-                } catch (error) {
-                    console.error('Error loading file content:', error);
-                }
-            }
-        };
-
-        loadFileContent();
-    }, [fileID, initialCode]); // Runs if fileID or initialCode changes
+   
 
     // --- MAIN REAL-TIME EFFECT (Supabase Channel) ---
     // This is the core of the collaboration features
@@ -253,11 +217,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     editor.getModel().applyEdits(payload.payload.changes,[]);
                     
                     // Update the local state and ref with the new code
-                    const newCode = editor.getValue();
-                    codeRef.current = newCode;
-                    setCode(newCode);
-                    
-                    // Mark as dirty since the content has changed
+                   
                     setIsSaved(false);
                 }
                 // Unset the flag
@@ -298,12 +258,13 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 const currentCode = editorRef.current?.getValue() || codeRef.current;
                 if (currentCode) {
                     // Send the current code back to *everyone* on the channel
+                    // NOTE: use 'senderId' so receivers can correctly ignore responses they sent themselves
                     channel.send({
                         type: 'broadcast',
                         event: 'initial-code-response',
                         payload: {
                             code: currentCode,
-                            userId: localClientIdRef.current
+                            senderId: localClientIdRef.current
                         }
                     });
                 }
@@ -315,71 +276,113 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             'broadcast',
             { event: 'initial-code-response' },
             (payload) => {
-                 // Ignore this message if we were the one who sent it
-                 if (payload.payload.senderId === localClientIdRef.current) {
-                     return;
-                 }
-                
-                const initialCode = payload.payload.code;
-                // Only set the code if our editor is currently empty
-                if (editorRef.current && editorRef.current.getValue() === '') {
+                // Ignore this message if we were the one who sent it
+                if (payload?.payload?.senderId === localClientIdRef.current) {
+                    return;
+                }
+
+                const respondedCode = payload?.payload?.code;
+                // Only set the code if our editor is currently empty to avoid stomping a live editor
+                if (respondedCode && editorRef.current && editorRef.current.getValue && editorRef.current.getValue() === ''  ) {
                     isUpdatingExternally.current = true;
-                    editorRef.current.setValue(initialCode);
-                    setCode(initialCode);
-                    codeRef.current = initialCode;
+                    editorRef.current.setValue(respondedCode);
+                    setCode(respondedCode);
+                    codeRef.current = respondedCode;
                     isUpdatingExternally.current = false;
                 }
             }
         );
+        
+        // --- New User Syncing Logic (respond to requests) ---
 
         // --- Presence (Online Users) Listeners ---
 
         // 'sync' fires *once* when YOU join, giving the full list of users
-        channel.on('presence', { event: 'sync' }, () => {
+        channel.on('presence', { event: 'sync' }, async () => {
             const state = channel.presenceState(); // Get the complete list
-            const users = {};
-            // Format the list into a simple object
-            Object.keys(state).forEach((key) => {
-                if (state[key][0]) {
-                    users[key] = state[key][0];
+             const users = {};
+             // Format the list into a simple object
+             Object.keys(state).forEach((key) => {
+                 if (state[key][0]) {
+                     users[key] = state[key][0];
+                 }
+             });
+             setOnlineUsers(users); // Set the state
+
+            // Decide whether to load the DB-provided initialCode:
+            // - If there is only one user in the room (yourself), load the initialCode prop.
+            // - If there are more users, skip loading the DB initial and let live broadcasts provide the code.
+            const usersCount = Object.keys(users).length;
+            setliveUserCount(usersCount);
+            console.log('Presence sync user count:', usersCount);
+            if (usersCount <= 0) {
+                // if (initialCode !== undefined && initialCode !== null) {
+                isUpdatingExternally.current = true;
+                 const { data, error } = await supabase
+                .from('File-Table')
+                .select('content, file_name, extension')
+                .eq('file_id', FileID)
+                .single();
+            
+            if (data) {
+                setCode(data.content);
+                codeRef.current = data.content;
+            }
+            else if (error) {
+                console.log('Error loading file content:', error);
+            }
+                    isUpdatingExternally.current = false;
+                    // }
                 }
-            });
-            setOnlineUsers(users); // Set the state
-        });
-
-        // 'join' fires when a NEW user joins the channel
-        channel.on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            setOnlineUsers((prev) => {
-                const updated = { ...prev };
-                newPresences.forEach((presence) => {
-                    updated[key] = presence; // Add the new user to the list
-                });
-                return updated;
-            });
-        });
-
-        // 'leave' fires when a user leaves the channel
-        channel.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            setOnlineUsers((prev) => {
-                const updated = { ...prev };
-                leftPresences.forEach((presence) => {
-                    delete updated[key]; // Remove the user from the list
-                });
-                return updated;
-            });
-        });
+         });
+ 
+         // 'join' fires when a NEW user joins the channel
+         channel.on('presence', { event: 'join' }, ({ key, newPresences }) => {
+             setOnlineUsers((prev) => {
+                 const updated = { ...prev };
+                 newPresences.forEach((presence) => {
+                     updated[key] = presence; // Add the new user to the list
+                 });
+                 return updated;
+             });
+         });
+ 
+         // 'leave' fires when a user leaves the channel
+         channel.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+             setOnlineUsers((prev) => {
+                 const updated = { ...prev };
+                 leftPresences.forEach((presence) => {
+                     delete updated[key]; // Remove the user from the list
+                 });
+                 return updated;
+             });
+         });
 
         // 3. Subscribe to the channel to start listening
         channel.subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-                // Now that we are subscribed, ask existing users for the current code state
-                channel.send({
-                    type: 'broadcast',
-                    event: 'request-initial-code',
-                    payload: { userId: localClientIdRef.current }
-                });
-            }
-        });
+             if (status === 'SUBSCRIBED') {
+                 // Now that we are subscribed, ask existing users for the current code state
+                 channel.send({
+                     type: 'broadcast',
+                     event: 'request-initial-code',
+                     payload: { userId: localClientIdRef.current }
+                 });
+                // If we already have currentUser, try to track presence now
+                if (currentUser) {
+                    channel.track({
+                        user_id: currentUser.id,
+                        name: currentUser.full_name,
+                        avatar_url: currentUser.avatar_url
+                    }).then(() => {
+                        // console.log('Tracked presence on subscribe for', currentUser.full_name);
+                    }).catch(err => {
+                        console.error('Error tracking presence on subscribe:', err);
+                    });
+                } else {
+                    // console.log('currentUser not ready at SUBSCRIBED. Will track when currentUser is set.');
+                }
+             }
+         });
 
         // 4. Cleanup function (runs when component unmounts or fileID changes)
         return () => {
@@ -402,27 +405,48 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     // This runs *after* the user's data is fetched and the channel is ready
     useEffect(() => {
         const trackPresence = async () => {
-            // Wait until we have both the user's data and the channel
-            if (!currentUser || !channelRef.current) return;
-            
+            if (!currentUser) {
+                return;
+            }
+            if (!channelRef.current) {
+                return;
+            }
+
+            // Wait for the channel to become joined / subscribed (retry a few times)
+            let tries = 0;
+            const maxTries = 6;
+            while (tries < maxTries) {
+                const state = channelRef.current.state || channelRef.current.status || null;
+                // console.log(`trackPresence: attempt ${tries + 1}, channel state:`, state);
+                if (state === 'joined' || state === 'SUBSCRIBED' || state === 'subscribed') break;
+                // small delay before next check
+                // eslint-disable-next-line no-await-in-loop
+                await new Promise((res) => setTimeout(res, 500));
+                tries += 1;
+            }
+
             try {
-                // Check if the channel is 'joined' (fully connected)
-                if (channelRef.current && channelRef.current.state === 'joined') {
-                    // Send this user's data to the presence tracker
-                    await channelRef.current.track({
-                        user_id: currentUser.id,
-                        name: currentUser.full_name,
-                        avatar_url: currentUser.avatar_url
-                    });
-                    console.log('Presence tracked for user:', currentUser.full_name);
-                }
+                await channelRef.current.track({
+                    user_id: currentUser.id,
+                    name: currentUser.full_name,
+                    avatar_url: currentUser.avatar_url
+                });
+                // console.log('Presence tracked for user:', currentUser.full_name);
             } catch (error) {
-                console.error('Error tracking presence:', error);
+                console.error('Error tracking presence after retries:', error);
             }
         };
 
         trackPresence();
     }, [currentUser]); // Run this whenever the currentUser state is set
+
+
+    //  useEffect(() => {
+    //     if (initialCode !== undefined && initialCode !== null) {
+    //         setCode(initialCode); // Set the editor's visual state
+    //         codeRef.current = initialCode; // Set the ref for non-React functions
+    //     }
+    // }, [initialCode]);
 
     /**
      * Monaco Editor's onMount handler.
@@ -547,7 +571,6 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     console.error('Database error updating language:', error);
                     alert(`Failed to update language: ${error.message || 'Unknown error'}`);
                 } else {
-                    console.log('Language updated successfully to:', newLanguage);
                     // (Show success message logic...)
                 }
             } catch (error) {
@@ -675,10 +698,9 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 {/* Header Right: Avatars and Action Buttons */}
                 <div className="editor-right-container">
                     
-                    {/* --- ONLINE USERS AVATAR LIST --- */}
-                    <div className="online-users-container">
-                        {/* Loop over the 'onlineUsers' state object */}
-                        {Object.values(onlineUsers).map((userPresence) => {
+                     <div className="online-users-container">
+                         {/* Loop over the 'onlineUsers' state object */}
+                         {Object.values(onlineUsers).map((userPresence) => {
                             // userPresence can be an array, get the first element
                             const userData = Array.isArray(userPresence) ? userPresence[0] : userPresence;
                             if (!userData) return null; // Skip if user data is invalid
