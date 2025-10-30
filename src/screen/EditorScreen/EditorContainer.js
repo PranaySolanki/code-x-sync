@@ -830,6 +830,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     language={language}
                     onClose={() => setShowRunPopup(false)}
                     onRun={handlePopupRun}
+                    theme={theme}
                 />
             )}
 

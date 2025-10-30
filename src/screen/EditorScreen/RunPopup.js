@@ -3,7 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import './EditorContainer.scss';
 
-const RunPopup = ({ code = '', onClose, onRun, language = 'javascript' }) => {
+const RunPopup = ({ code = '', onClose, onRun, language = 'javascript',theme }) => {
+  const codetheme = theme;
   const [localCode, setLocalCode] = useState(code);
   const editorRef = useRef(null);
 
@@ -22,7 +23,7 @@ const RunPopup = ({ code = '', onClose, onRun, language = 'javascript' }) => {
 
   return (
     <div className="run-popup-overlay">
-      <div className="run-popup">
+      <div className="run-popup" style={{ background: theme === 'vs-dark' ? 'var(--popup-bg-dark, #1e1e1e)' : 'var(--popup-bg, #fff)' }}>
         <div className="run-popup-header">
           <h3>Run Preview</h3>
           <button className="close-btn" onClick={onClose}>✕</button>
@@ -31,6 +32,7 @@ const RunPopup = ({ code = '', onClose, onRun, language = 'javascript' }) => {
           <Editor
             height="300px"
             language={language}
+            theme={theme}
             defaultValue={code}
             onMount={handleMount}
             onChange={(value) => setLocalCode(value)}
