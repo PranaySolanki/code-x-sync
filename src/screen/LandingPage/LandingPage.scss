@@ -13,6 +13,7 @@
     --input-hover-bd-color: #7e22ce;
 }
 
+
 .landing-page-container{
 .LPheader{
     /* background-color: #fff;
@@ -1644,6 +1645,17 @@ video {
   .xl\:tw-columns-3 {
     columns: 3;
   }
+}
+
+.log-out-btn:hover{
+  cursor: pointer;  
+  color: red;
+}
+
+.view-profile:hover{
+  cursor: pointer;  
+  font-weight: bold;
+  color: #ffffff;
 }
 
 }  

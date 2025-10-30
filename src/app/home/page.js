@@ -273,11 +273,11 @@ const LandingPage = () => {
                             </button>
                             {isUserMenuOpen && (
                                 <div className="tw-absolute tw-right-0 tw-mt-2 tw-min-w-[180px] tw-rounded-md tw-border tw-border-[#2a2a2a] tw-bg-[#0c0c0c] tw-py-1 tw-shadow-lg">
-                                    <a href="/profile" className="tw-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-px-4 tw-py-2 hover:tw-bg-[#1a1a1a]">
+                                    <a href="/profile" className="tw-flex tw-cursor-pointer view-profile tw-items-center tw-gap-2 tw-px-4 tw-py-2 hover:tw-bg-[#1a1a1a]">
                                         <i className="bi bi-person"></i>
-                                        <span>View profile</span>
+                                        <span>ViewProfile</span>
                                     </a>
-                                    <button onClick={handleLogout} className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-2 tw-px-4 tw-py-2 hover:tw-bg-[#ef4444] hover:tw-text-white">
+                                    <button onClick={handleLogout} className="tw-flex tw-cursor-pointer tw-w-full  tw-items-center tw-gap-2 tw-px-4 tw-py-2 hover:tw-bg-[#ef4444]  hover:tw-text-white log-out-btn">
                                  
                                         <i className="bi bi-box-arrow-right"></i>
                                         <span>Log out</span>
