@@ -10,6 +10,10 @@
   --accent-secondary: #3b82f6;
 }
 
+h3{
+  color: var(--accent-secondary);
+}
+
 body {
   margin: 0;
   background: var(--background);
