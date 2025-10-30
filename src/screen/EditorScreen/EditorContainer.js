@@ -34,6 +34,8 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     // State to track if the current code is saved to the database (true = "Saved", false = "Save Code")
     const [isSaved, setIsSaved] = useState(true);
 
+    const [itsMyFirstTime, setItsMyFirstTime] = useState(true);
+
     // --- REFS ---
     // Refs are used to hold values that persist across renders without causing a re-render
 
@@ -288,6 +290,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     editorRef.current.setValue(respondedCode);
                     setCode(respondedCode);
                     codeRef.current = respondedCode;
+                    setItsMyFirstTime(false);
                     isUpdatingExternally.current = false;
                 }
             }
@@ -315,7 +318,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             const usersCount = Object.keys(users).length;
             setliveUserCount(usersCount);
             console.log('Presence sync user count:', usersCount);
-            if (usersCount <= 0) {
+            if (usersCount <= 0 && itsMyFirstTime===true) {
                 // if (initialCode !== undefined && initialCode !== null) {
                 isUpdatingExternally.current = true;
                  const { data, error } = await supabase
@@ -327,6 +330,8 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
             if (data) {
                 setCode(data.content);
                 codeRef.current = data.content;
+                setItsMyFirstTime(false);
+                console.log(itsMyFirstTime)
             }
             else if (error) {
                 console.log('Error loading file content:', error);
