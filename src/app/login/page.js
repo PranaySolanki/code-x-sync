@@ -101,22 +101,22 @@ const LoginScreen = () => {
               </span>
             )}
 
-            <div className="social-login">
+            {/* <div className="social-login">
               {/* Uncomment this button if you want the side-by-side layout */}
               {/* <button type="button" className="social-btn github">
                 <ion-icon name="logo-github"></ion-icon>
                 <span>GitHub</span>
               </button> */}
               {/* MODIFIED: Wrap the Google button for centering */}
-              <div className="single-social-login-container">
+              {/* <div className="single-social-login-container">
                 <button type="button" className="social-btn google">
                   <ion-icon name="logo-google"></ion-icon>
                   <span>Google</span>
                 </button>
               </div>
-            </div>
+            </div>  */}
 
-            <div className="divider"><span>Or continue with Email</span></div>
+            {/* <div className="divider"><span>Or continue with Email</span></div>  */}
 
             <div className="input-box">
               <label htmlFor="email">Email</label>
