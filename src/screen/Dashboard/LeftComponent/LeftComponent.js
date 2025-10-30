@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import Image from 'next/image';
+import Link from 'next/link';
 import logo from '@/assets/logo.png';
 import { ModalContext } from '@/screen/Dashboard/components/Dialog_box_state';
 
@@ -19,6 +20,35 @@ const StyledLeftComponent = styled.div`
     @media (max-width: 768px){
         position: relative;
         width: 100%;
+    }
+`;
+
+const HomeButton = styled(Link)`
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 12px;
+    color: #e2e8f0;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(71, 85, 105, 0.4);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+    text-decoration: none;
+
+    &:hover{
+        cursor: pointer;
+        transform: translateY(-2px);
+        background: rgba(30, 41, 59, 0.8);
+        border-color: rgba(100, 116, 139, 1);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    span.material-icons{
+        font-size: 20px;
     }
 `;
 
@@ -89,6 +119,10 @@ const LeftComponent = () => {
 
     return (
         <StyledLeftComponent>
+            <HomeButton href="/">
+                <span className="material-icons">home</span>
+                Home
+            </HomeButton>
             <ContentContainer>
                 <Logo src={logo} alt="logo" width={165} height={165} />
                 <MainHeading> <span>Code</span> Dashboard</MainHeading>
