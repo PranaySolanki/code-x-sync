@@ -495,6 +495,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                     }
                 });
             }
+            setItsMyFirstTime(false);
         });
     };
 
@@ -592,9 +593,9 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
     }
 
     // Placeholder for fullscreen functionality
-    const fullscreen = () => {
-       // Functionality to be implemented
-    }
+    // const fullscreen = () => {
+    //    // Functionality to be implemented
+    // }
 
     // --- CODE EXECUTION FUNCTIONS ---
 
@@ -769,11 +770,11 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
 
 
                     {/* Action Buttons (Fullscreen, Upload, Download) */}
-                    <Tooltip title="Full Screen" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
+                    {/* <Tooltip title="Full Screen" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
                         <button className="btn" onClick={fullscreen} disabled={isProcessing} >
                             <span className="material-symbols-outlined">fullscreen</span>
                         </button>
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip title="Upload Code" placement="bottom" arrow enterDelay={100} leaveDelay={0}>
                         {/* Use a label to style a button that triggers a hidden file input */}
                         <label htmlFor="import-code" className="btn" disabled={isProcessing} >
