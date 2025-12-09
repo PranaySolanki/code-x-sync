@@ -427,7 +427,7 @@ const EditorContainer = ({ onCodeRun, input, theme, setTheme, fileName, onTitleC
                 if (state === 'joined' || state === 'SUBSCRIBED' || state === 'subscribed') break;
                 // small delay before next check
                 // eslint-disable-next-line no-await-in-loop
-                await new Promise((res) => setTimeout(res, 500));
+                await new Promise((res) => setTimeout(res, 100));
                 tries += 1;
             }
 
