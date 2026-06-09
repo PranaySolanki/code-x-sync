@@ -5,11 +5,11 @@ const API = axios.create({
 });
 
 const LANGUAGE_VERSIONS = {
-  c: "10.2.0",
-  python: "3.10.0",
-  java: "15.0.2",
+  c: "*",
+  python: "3",
+  java: "*",
   // Use node version for JavaScript execution
-  javascript: "18.15.0",
+  javascript: "*",
 };
 
 const executeCode = async (language, sourceCode, stdin) => {
